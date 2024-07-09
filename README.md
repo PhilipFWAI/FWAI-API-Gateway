@@ -26,3 +26,18 @@ This Gateway provide a single entry point for managing all inbound and outbound 
 11. Transform Responses
 
 12. Errors Handling
+
+## INSTALLATION AND DB SETUP
+
+1. Clone the repository: ```git clone git@github.com:PhilipFWAI/FWAI-API-Gateway.git```
+2. Node Version ```21.5.0```.
+3. Setup Database:
+
+- Run this command ```npx sequelize init```.
+- Run this script ```npm run deleteAllTables```.
+- Run this script ```npm run createAllTables```.
+- Run this script ```npm run createAllSeeds```.
+
+4. Install dependencies:```npm install``` or ```yarn add```
+5. Copy `.env.example` to `.env` and add values to all variables.
+6. Start the server, to test gateway performance:```npm run dev```

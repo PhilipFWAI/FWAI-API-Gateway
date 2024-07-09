@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"target": "es2022",
+		"module": "commonjs",
+		"resolveJsonModule": true,
+		"lib": [ "esnext" ],
+		"sourceMap": true,
+		"outDir": "./dist",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+	},
+}
