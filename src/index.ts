@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import { rateLimiter } from './utils/rateLimiterUtils';
 import { corsOptions } from './utils/corsOptionsUtils';
 import httpStatus from 'http-status';
+import router from './routes';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -13,12 +14,14 @@ app.use(express.json());
 app.use(cors(corsOptions));
 app.use(rateLimiter);
 
-app.get('**', (req: Request, res: Response) => {
-  res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'WELCOME TO OUR GATEWAY.' });
-});
+app.use('/api-gateway', router);
 
 app.listen(PORT, () => {
   console.log(`GATEWAY IS RUNNING ON PORT ${PORT}`);
+});
+
+app.get('**', (req: Request, res: Response) => {
+  res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'WELCOME TO OUR APIs GATEWAY.' });
 });
 
 export default app;

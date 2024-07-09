@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import * as dbConnection from '../configs/config';
-import { DB, DBConfig } from '../../types/modelTypes';
+import { DB, DBConfig } from '../../types/modelsTypes';
 import { Sequelize, DataTypes, Model, ModelStatic } from 'sequelize';
 
 const db: Partial<DB> = {};
@@ -13,7 +13,7 @@ const config = dbConnection[env as keyof typeof dbConnection] as DBConfig;
 if (config.url) {
     sequelize = new Sequelize(config.url, config);
 } else {
-    if (!config.database || !config.username || !config.password) {
+    if (!config.username || !config.password) {
         throw new Error('Database configuration is incomplete.');
     }
     sequelize = new Sequelize(config.database, config.username, config.password, config);

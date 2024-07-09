@@ -1,5 +1,5 @@
-import { Sequelize, Model, DataTypes, ModelCtor } from 'sequelize';
-import { SessionInterface } from '../../types/modelTypes';
+import { Sequelize, Model, DataTypes } from 'sequelize';
+import { SessionInterface } from '../../types/modelsTypes';
 
 module.exports = (sequelize: Sequelize) => {
     class sessions extends Model<SessionInterface> 
@@ -10,7 +10,7 @@ module.exports = (sequelize: Sequelize) => {
             declare refresh_token: string;
             declare createdAt: Date;
             declare updatedAt: Date;
-            static associate (models: { [key: string]: ModelCtor<Model> }) {
+            static associate (models) {
                 sessions.belongsTo(models.users, { as: 'user', foreignKey: 'userId' });
             }
         }

@@ -1,5 +1,5 @@
-import { Sequelize, Model, DataTypes, ModelCtor } from 'sequelize';
-import { AccountTypesInterface } from '../../types/modelTypes';
+import { Sequelize, Model, DataTypes } from 'sequelize';
+import { AccountTypesInterface } from '../../types/modelsTypes';
 
 module.exports = (sequelize: Sequelize) => {
     class AccountTypes extends Model<AccountTypesInterface> 
@@ -7,7 +7,7 @@ module.exports = (sequelize: Sequelize) => {
             declare accountType: string;
             declare createdAt: Date;
             declare updatedAt: Date;
-            static associate (models: { [key: string]: ModelCtor<Model> }) {
+            static associate (models) {
                 AccountTypes.hasOne(models.users, { as: 'user', foreignKey: 'accountTypeId' });
             }
         }

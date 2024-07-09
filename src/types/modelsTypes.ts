@@ -1,9 +1,9 @@
-import { Sequelize, Dialect, Model, ModelStatic, ModelCtor } from 'sequelize';
+import { Sequelize, Dialect } from 'sequelize';
 
 export interface DB {
+    [key: string]: any;
     sequelize: Sequelize;
     Sequelize: typeof Sequelize;
-    [key: string]: ModelStatic<Model> | ModelCtor<Model> | Sequelize | typeof Sequelize;
 }
 
 export interface DBConfig {
@@ -19,17 +19,19 @@ export interface DBConfig {
 
 export interface AccountTypesInterface {
     accountType: string;
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface UsersInterface {
+    id?: number;
     accountTypeId: number;
     username: string;
     email: string;
     password: string;
-    createdAt: Date;
-    updatedAt: Date;
+    isVerified: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 export interface SessionInterface {
@@ -37,6 +39,6 @@ export interface SessionInterface {
     deviceId: string,
     access_token: string,
     refresh_token: string,
-    createdAt: Date;
-    updatedAt: Date;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
