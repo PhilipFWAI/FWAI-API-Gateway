@@ -21,5 +21,13 @@ const signupSchema = Joi.object({
     'any.only': 'accountTypeId must be either \'1\', \'2\' or \'3\'. 1 for business, 2 for personal and 3 for developer',
   }),
 });
-  
-export { signupSchema };
+
+const userDeviceSchema = Joi.object().keys({
+  'user-device': Joi.string().required().messages({
+      'any.required': 'User-Device is required in the headers',
+      'string.base': 'User-Device should be a type of text in the headers',
+      'string.empty': 'User-Device cannot be an empty field in the headers',
+  }),
+}).unknown(true);
+
+export { signupSchema, userDeviceSchema };

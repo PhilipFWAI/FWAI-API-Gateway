@@ -4,7 +4,7 @@ import { hashPassword } from '../../utils/passwordUtils';
 const userOne = {
   accountTypeId: 2,
   username: 'Josue',
-  email: 'josue@firstwaveai.com',
+  email: 'firstwaveai@firstwaveai.com',
   password: hashPassword('Qwerty@123'),
   isVerified: true,
   createdAt: new Date(),

@@ -14,7 +14,7 @@ module.exports = (sequelize: Sequelize) => {
             declare createdAt: Date;
             declare updatedAt: Date;
             static associate (models) {
-                users.hasMany(models.sessions, { as: 'session', foreignKey: 'userId' }),
+                users.hasMany(models.sessions, { as: 'session', foreignKey: 'userId' });
                 users.belongsTo(models.accountTypes, { as: 'accountType', foreignKey: 'accountTypeId' });
             }
         }
