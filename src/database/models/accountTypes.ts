@@ -8,7 +8,7 @@ module.exports = (sequelize: Sequelize) => {
             declare createdAt: Date;
             declare updatedAt: Date;
             static associate (models) {
-                AccountTypes.hasOne(models.users, { as: 'user', foreignKey: 'accountTypeId' });
+                AccountTypes.hasOne(models.users, { as: 'user', foreignKey: 'accountType_id' });
             }
         }
     

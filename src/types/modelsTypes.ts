@@ -25,7 +25,7 @@ export interface AccountTypesInterface {
 
 export interface UsersInterface {
     id?: number;
-    accountTypeId: number;
+    accountType_id: number;
     username: string;
     email: string;
     password: string;
@@ -35,8 +35,8 @@ export interface UsersInterface {
 }
 
 export interface SessionInterface {
-    userId: number,
-    deviceId: string,
+    user_id: number,
+    device_id: string,
     access_token: string,
     refresh_token: string,
     createdAt?: Date;

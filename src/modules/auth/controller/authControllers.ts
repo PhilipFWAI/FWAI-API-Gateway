@@ -11,7 +11,7 @@ const signup = async (req: Request, res: Response) => {
     const refreshToken: string = generateRefreshToken(42);
     const deviceId = JSON.stringify(req.headers['user-device']);
     const accessToken: string = generateAccessToken(user.id, process.env.JWT_SECRET as string);
-    await authRepositories.createSession({ userId: user.id, deviceId, access_token: accessToken, refresh_token: refreshToken });
+    await authRepositories.createSession({ user_id: user.id, device_id: deviceId, access_token: accessToken, refresh_token: refreshToken });
     await sendEmail(`${process.env.API_GATEWAY_BASE_URL}/api-gateway/auth/verify-email/${accessToken}`, 'Verification Account',  user.email, user.password );
 
     return res.status(httpStatus.CREATED).json({ status: httpStatus.CREATED, message: 'Account created successfully. Please check Email Box to verify account.', data: { user } });
@@ -23,11 +23,34 @@ const signup = async (req: Request, res: Response) => {
 const verifyEmail = async (req: any, res: Response) => {
   try {
     await authRepositories.updateUserByAttributes('isVerified', true, 'id', req.user.id);
-    await authRepositories.destroySessionByAttribute('userId', req.user.id, 'access_token', req.session.access_token);
+    await authRepositories.destroySessionByAttribute('user_id', req.user.id, 'access_token', req.session.access_token);
     res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Account verified successfully, now login' });
   } catch (error: unknown) {    
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
   }
 };
 
-export default { signup, verifyEmail };
+const signin = async (req: any, res: Response) => {
+  try {
+    if (req.session) return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Logged in successfully', data: { user: req.user, session: req.session } });
+
+    const refreshToken: string = generateRefreshToken(42);
+    const accessToken: string = generateAccessToken(req.user.id, process.env.JWT_SECRET as string);
+    const session = await authRepositories.createSession({ user_id: req.user.id, device_id: req.deviceId, access_token: accessToken, refresh_token: refreshToken });
+
+    res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Logged in successfully', data: { user: req.user, session  } });
+  } catch (error: unknown) {    
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+  }
+};
+
+const signout = async (req: any, res: Response) => {
+  try {
+    await authRepositories.destroySessionByAttribute('user_id', req.user.id, 'access_token', req.session.access_token);
+    res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Successfully logged out' });
+  } catch (error: unknown) {    
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+  }
+};
+
+export default { signup, verifyEmail, signin, signout };

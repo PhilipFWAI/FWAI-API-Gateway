@@ -9,8 +9,8 @@ const createUser = async (body: UsersInterface): Promise<UsersInterface> => {
     return await users.create({ ...body, isVerified: false });
 };
 
-const findUserByAttributes = async (key: string, value: number | string | boolean): Promise<UsersInterface> => {
-    return await users.findOne({ where: { [key]: value } });
+const findUserByAttributes = async (primaryKey: string, primaryValue: number | string | boolean): Promise<UsersInterface> => {
+    return await users.findOne({ where: { [primaryKey]: primaryValue } });
 };
 
 const updateUserByAttributes = async (updatedKey: string, updatedValue: number | string | boolean, whereKey: string, whereValue: number | string | boolean): Promise<UsersInterface> => {
@@ -26,8 +26,12 @@ const findSessionByAttributes = async (primaryKey: string, primaryValue: number 
     return await sessions.findOne({ where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue, } });
 };
 
+const findSessionByTripleAttributes = async (primaryKey: string, primaryValue: number | string | boolean, secondaryKey: string, secondaryValue: number | string | boolean, extraKey: string, extraValue: number | string | boolean): Promise<UsersInterface> => {
+    return await sessions.findOne({ where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue, [extraKey]: extraValue } });
+};
+
 const destroySessionByAttribute = async (primaryKey: string, primaryValue: number | string, secondaryKey: string, secondaryValue: string): Promise<void> => {
     await sessions.destroy({where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue }});
 };
 
-export default { createUser, findUserByAttributes, updateUserByAttributes, createSession, findSessionByAttributes, destroySessionByAttribute};
+export default { createUser, findUserByAttributes, updateUserByAttributes, createSession, findSessionByAttributes, findSessionByTripleAttributes, destroySessionByAttribute };

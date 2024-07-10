@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import httpStatus from 'http-status';
 import { verifyToken } from '../utils/jwtUtils';
+import { comparePassword } from '../utils/passwordUtils';
 import { Request, Response, NextFunction } from 'express';
 import authRepositories from '../modules/auth/repository/authRepositories';
 
@@ -52,7 +53,7 @@ const isUserExist = async (req: Request, res: Response, next: NextFunction) => {
 const isAccountVerified = async (req: any, res: Response, next: NextFunction) => {
     try {
       const verifiedToken = await verifyToken(req.params.access_token, process.env.JWT_SECRET as string);
-      const session = await authRepositories.findSessionByAttributes('userId', verifiedToken.id, 'access_token', req.params.access_token);
+      const session = await authRepositories.findSessionByAttributes('user_id', verifiedToken.id, 'access_token', req.params.access_token);
       if (!session) return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: 'Email verification link expired or invalid.' });
   
       const user = await authRepositories.findUserByAttributes('id', verifiedToken.id );
@@ -66,5 +67,31 @@ const isAccountVerified = async (req: any, res: Response, next: NextFunction) =>
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
     }
 };
+
+const isCredentialExist = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const deviceId = JSON.stringify(req.headers['user-device']);
+        const user = await authRepositories.findUserByAttributes('email', req.body.email);
+        if (!user) return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: 'Invalid username or password' });
+
+        const passwordMatches = await comparePassword(req.body.password, user.password);
+        if (!passwordMatches) return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: 'Invalid username or password' });
+
+        const session = await authRepositories.findSessionByAttributes('user_id', user.id, 'device_id', deviceId);
+        if (!session) {
+            req.user = user;
+            req.session = null;
+            req.deviceId = deviceId;
+            return next();
+        }
+
+        req.user = user;
+        req.session = session;
+        req.deviceId = deviceId;
+        return next();
+    } catch (error: unknown) {    
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    }
+};
   
-export { isBodyValidation, isHeaderValidation, isUserExist, isAccountVerified };
+export { isBodyValidation, isHeaderValidation, isUserExist, isAccountVerified, isCredentialExist };
