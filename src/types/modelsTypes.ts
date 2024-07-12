@@ -1,12 +1,12 @@
 import { Sequelize, Dialect } from 'sequelize';
 
-export interface DB {
+export interface DBInterface {
     [key: string]: any;
     sequelize: Sequelize;
     Sequelize: typeof Sequelize;
 }
 
-export interface DBConfig {
+export interface DBConfigInterface {
     url?: string;
     host?: string;
     dialect: Dialect;
@@ -35,10 +35,10 @@ export interface UsersInterface {
 }
 
 export interface SessionInterface {
-    user_id: number,
-    device_id: string,
-    access_token: string,
-    refresh_token: string,
+    user_id?: number,
+    device_id?: string,
+    access_token?: string,
+    refresh_token?: string,
     createdAt?: Date;
     updatedAt?: Date;
 }

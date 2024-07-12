@@ -46,17 +46,12 @@ const signinSchema = Joi.object({
   }),
 });
 
-const authorizationSchema = Joi.object().keys({
-  authorization: Joi.string().required().messages({
-      'any.required': 'authorization is required in the headers',
-      'string.base': 'authorization should be a type of text in the headers',
-      'string.empty': 'authorization cannot be an empty field in the headers',
-  }),
-  'user-device': Joi.string().required().messages({
-    'any.required': 'User-Device is required in the headers',
-    'string.base': 'User-Device should be a type of text in the headers',
-    'string.empty': 'User-Device cannot be an empty field in the headers',
-}),
+const gatewayAuthorizationSchema = Joi.object().keys({
+  'gateway-authorization': Joi.string().required().messages({
+      'any.required': 'Gateway-Authorization is required in the headers',
+      'string.base': 'Gateway-Authorization should be a type of text in the headers',
+      'string.empty': 'Gateway-Authorization cannot be an empty field in the headers',
+  })
 }).unknown(true);
 
-export { signupSchema, userDeviceSchema, signinSchema, authorizationSchema };
+export { signupSchema, userDeviceSchema, signinSchema, gatewayAuthorizationSchema };
