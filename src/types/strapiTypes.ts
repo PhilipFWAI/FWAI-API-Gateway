@@ -5,6 +5,7 @@ export interface CustomerInterface {
 }
 
 export interface ProductInfoInterface {
+    id?: string;
     name: string;
 }
 

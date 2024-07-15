@@ -10,9 +10,10 @@ router.get('/checkout-payment-succeeded', stripeControllers.stripeCheckoutSuccee
 
 router.post('/plan-details', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripePlan);
 router.post('/customer-details', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripeCustomer);
-router.post('/price-details/:productId', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripePrice);
-router.post('/subscription-details/:customerId/:priceId', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripeSubscription);
-router.post('/checkout-subscription/:customerId/:subscriptionId', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripeCheckoutSubscription);
+router.post('/price-details', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripePrice);
+router.post('/payment-details', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripePayment);
+router.post('/subscription-details', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripeSubscription);
+router.post('/checkout-subscription', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripeCheckoutSubscription);
 router.post('/checkout-subscription-payment-complete-flow', isHeaderValidation(gatewayAuthorizationSchema), gatewayAuthorization([ '1', '2', '3' ]), stripeControllers.stripeCheckoutSubscriptionCompleteFlow);
 
 export default router;

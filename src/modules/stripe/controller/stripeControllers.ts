@@ -30,7 +30,6 @@ const stripePlan = async (req: ExtendRequest, res: Response) => {
 
 const stripePrice = async (req: ExtendRequest, res: Response) => {
   try {
-    req.body.priceInfo.product = req.params.productId;
     let price: PriceInfoInterface = await stripeRepositories.getStrapiPricesByAttribute('product', req.body.priceInfo.product);
     if (!price) price = await stripeRepositories.createStrapiPrice(req.body.priceInfo);
 
@@ -40,12 +39,21 @@ const stripePrice = async (req: ExtendRequest, res: Response) => {
   }
 };
 
+const stripePayment = async (req: ExtendRequest, res: Response) => {
+  try {
+    let payment = await stripeRepositories.getStrapiPaymentByAttribute('customer', req.body.paymentInfo.customer);
+    if (!payment) payment = await stripeRepositories.createStrapiPayment(req.body.paymentInfo.customer, req.body.paymentInfo);
+
+    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe payment creted successfully.', data: { payment } });
+  } catch (error: unknown) {    
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+  }
+};
+
 const stripeSubscription = async (req: ExtendRequest, res: Response) => {
   try {
-    const priceId = req.params.priceId;
-    const customerId = req.params.customerId;
-    let subscription = await stripeRepositories.getStrapiSubscriptionByAttribute('customer', customerId, 'price', priceId);
-    if (!subscription) subscription = await stripeRepositories.createStrapiSubscription({ customer: customerId, items: [ { price: priceId }, ], });
+    let subscription = await stripeRepositories.getStrapiSubscriptionByAttribute('customer', req.body.subscriptionInfo.customer, 'price', req.body.subscriptionInfo.items[0].price);
+    if (!subscription) subscription = await stripeRepositories.createStrapiSubscription(req.body.subscriptionInfo);
 
     return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe subscription created successfully.', data: { subscription } });
   } catch (error: unknown) {    
@@ -55,9 +63,8 @@ const stripeSubscription = async (req: ExtendRequest, res: Response) => {
 
 const stripeCheckoutSubscription = async (req: ExtendRequest, res: Response) => {
   try {
-    req.body.sessionInfo.customer = req.params.customerId;
-    req.body.sessionInfo.subscription = req.params.subscriptionId;
-    let session = await stripeRepositories.getStrapiSessionByAttribute('customer', req.params.customerId, 'subscription', req.params.subscriptionId);
+    let session = await stripeRepositories.getStrapiSessionByAttribute('customer', req.body.sessionInfo.customer, 'subscription', req.body.sessionInfo.subscription);
+    delete req.body.sessionInfo.subscription;
     if (!session) session = await stripeRepositories.createStrapiSession(req.body.sessionInfo);
 
     return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe payment checked-out successfully.', data: { session } });
@@ -75,11 +82,16 @@ const stripeCheckoutSubscriptionCompleteFlow = async (req: ExtendRequest, res: R
     let product: ProductInfoInterface = await stripeRepositories.getStrapiProductByAttribute('name', req.body.planInfo.name);
     if (!product) product = await stripeRepositories.createStrapiProduct(req.body.planInfo);
 
+    req.body.priceInfo.product = product.id;
     let price: PriceInfoInterface = await stripeRepositories.getStrapiPricesByAttribute('product', req.body.priceInfo.product);
     if (!price) price = await stripeRepositories.createStrapiPrice(req.body.priceInfo);
 
+    let payment = await stripeRepositories.getStrapiPaymentByAttribute('customer', customer.id);
+    if (!payment) payment = await stripeRepositories.createStrapiPayment(customer.id, req.body.paymentInfo);
+
+
     let subscription = await stripeRepositories.getStrapiSubscriptionByAttribute('customer', customer.id, 'price', price.id);
-    if (!subscription) subscription = await stripeRepositories.createStrapiSubscription({ customer: customer.id, items: [ { price: price.id }, ], });
+    if (!subscription) subscription = await stripeRepositories.createStrapiSubscription({ customer: customer.id, default_payment_method: payment.id, items: [ { price: price.id }, ], });
 
     req.body.sessionInfo.customer = customer.id;
     req.body.sessionInfo.subscription = subscription.id;
@@ -108,4 +120,4 @@ const stripeCheckoutCancelled = async (req: Request, res: Response) => {
   }
 };
 
-export default { stripeCustomer, stripePlan, stripePrice, stripeSubscription, stripeCheckoutSubscription, stripeCheckoutSubscriptionCompleteFlow, stripeCheckoutSucceeded, stripeCheckoutCancelled };
+export default { stripeCustomer, stripePlan, stripePrice, stripePayment, stripeSubscription, stripeCheckoutSubscription, stripeCheckoutSubscriptionCompleteFlow, stripeCheckoutSucceeded, stripeCheckoutCancelled };

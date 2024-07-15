@@ -28,7 +28,21 @@ const getStrapiPricesByAttribute = async (primaryKey: string, primaryValue: numb
     return price.data[0];
 };
 
-const createStrapiSubscription= async (body: Stripe.SubscriptionCreateParams): Promise<Stripe.Subscription> => {
+const createStrapiPayment = async (customerId: string, body: any): Promise<Stripe.PaymentMethod> => {
+    delete body.customer;
+    let payment = await stripe.paymentMethods.create(body);
+    payment =  await stripe.paymentMethods.attach(payment.id, { customer: customerId });
+    await stripe.customers.update(customerId, { invoice_settings: { default_payment_method: payment.id }, });
+
+    return payment;
+};
+
+const getStrapiPaymentByAttribute = async (primaryKey: string, primaryValue: number | string | boolean): Promise<Stripe.PaymentMethod> => {
+    const price = await stripe.paymentMethods.list({ [primaryKey]: primaryValue });
+    return price.data[0];
+};
+
+const createStrapiSubscription = async (body: Stripe.SubscriptionCreateParams): Promise<Stripe.Subscription> => {
     return await stripe.subscriptions.create(body);
 };
 
@@ -53,6 +67,8 @@ export default {
     getStrapiProductByAttribute,
     createStrapiPrice,
     getStrapiPricesByAttribute,
+    createStrapiPayment,
+    getStrapiPaymentByAttribute,
     createStrapiSubscription,
     getStrapiSubscriptionByAttribute,
     createStrapiSession,
