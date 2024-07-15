@@ -1,5 +1,4 @@
 import express, { Express, Request, Response } from 'express';
-import { rateLimiter } from './utils/rateLimiterUtils';
 import { corsOptions } from './utils/corsOptionsUtils';
 import httpStatus from 'http-status';
 import router from './routes';
@@ -13,7 +12,6 @@ const PORT: number = Number(process.env.PORT) || 3000;
 app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cors(corsOptions));
-app.use(rateLimiter);
 
 app.use('/api-gateway', router);
 
