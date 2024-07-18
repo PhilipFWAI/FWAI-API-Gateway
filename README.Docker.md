@@ -11,3 +11,5 @@ When you're ready, start your application by running:
 - Run this command to list container configurations ```docker inspect CONTAINER ID```.
 
 - Reference: https://imel.co.za/boosting-availability-and-performance-how-to-load-balance-a-node-api-gateway-with-docker/
+
+Grafana Credentials: username: admin and password:your-password
