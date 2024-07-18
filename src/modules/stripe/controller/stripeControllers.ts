@@ -5,6 +5,16 @@ import stripeRepositories from '../repository/stripeRepositories';
 import { customerInfoUtil } from '../../../utils/customerInfoUtils';
 import { PriceInfoInterface, ProductInfoInterface } from '../../../types/strapiTypes';
 
+const stripeGetSubscription = async (req: ExtendRequest, res: Response) => {
+  try {
+    const subscription = await stripeRepositories.getStripeSubscriptionByAttribute('customer', req.params.customerId);
+
+    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe subscription proceed successfully.', data: { subscription } });
+  } catch (error: unknown) {    
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+  }
+};
+
 const stripeCustomer = async (req: ExtendRequest, res: Response) => {
   try {
     const customerInfo = await customerInfoUtil(req);
@@ -39,16 +49,6 @@ const stripePrice = async (req: ExtendRequest, res: Response) => {
   }
 };
 
-const stripeGetSubscription = async (req: ExtendRequest, res: Response) => {
-  try {
-    const subscription = await stripeRepositories.getStripeSubscriptionByAttribute('customer', req.params.customerId);
-
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe subscription proceed successfully.', data: { subscription } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
-  }
-};
-
 const stripeCheckoutSession = async (req: ExtendRequest, res: Response) => {
   try {
     let session = await stripeRepositories.getStripeSessionByAttribute('customer', req.body.sessionInfo.customer);
@@ -61,7 +61,7 @@ const stripeCheckoutSession = async (req: ExtendRequest, res: Response) => {
   }
 };
 
-const stripeCheckoutSubscriptionCompleteFlow = async (req: ExtendRequest, res: Response) => {
+const stripeCheckoutSessionCompleteFlow = async (req: ExtendRequest, res: Response) => {
   try {
     const customerInfo = await customerInfoUtil(req);
     let customer = await stripeRepositories.getStripeCustomerByAttribute('email', customerInfo.email);
@@ -100,4 +100,4 @@ const stripeCheckoutCancelled = async (req: Request, res: Response) => {
   }
 };
 
-export default { stripeCustomer, stripePlan, stripePrice, stripeCheckoutSession, stripeCheckoutSubscriptionCompleteFlow, stripeGetSubscription, stripeCheckoutSucceeded, stripeCheckoutCancelled };
+export default { stripeGetSubscription, stripeCustomer, stripePlan, stripePrice, stripeCheckoutSession, stripeCheckoutSessionCompleteFlow, stripeCheckoutSucceeded, stripeCheckoutCancelled };

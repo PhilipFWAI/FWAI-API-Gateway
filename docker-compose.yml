@@ -1,12 +1,8 @@
 version: "3"
 
 networks:
-  monitoring:
-    driver: bridge
-  
-volumes:
-    grafana_data: {}
-    prometheus_data: {}
+  api-gateway:
+  loki:
 
 services:
   gateway:
@@ -17,6 +13,9 @@ services:
       replicas: 3
     environment:
       - PORT=3000
+    networks:
+      - api-gateway
+      - loki
 
   nginx:
     container_name: nginx
@@ -28,6 +27,9 @@ services:
       - ./nginx/cache:/var/cache/nginx
     depends_on:
       - gateway
+    networks:
+      - api-gateway
+      - loki
 
   node-exporter:
     container_name: node-exporter
@@ -44,17 +46,34 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     ports:
       - 9100:9100
-
-  grafana:
-    container_name: grafana
-    image: grafana/grafana:latest
-    user: "root"
-    ports:
-      - 3000:3000
-    restart: unless-stopped
+    networks:
+      - api-gateway
+      - loki
+  
+  loki:
+    image: grafana/loki:2.9.2
     volumes:
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
-      - ./grafana:/var/lib/grafana
+      - ./loki:/etc/loki
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - api-gateway
+      - loki
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    volumes:
+      - /var/log:/var/log
+      - ./promtail:/etc/promtail
+    ports:
+      - "1514:1514"
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - api-gateway
+      - loki
 
   prometheus:
     container_name: prometheus
@@ -72,35 +91,46 @@ services:
       - '--web.enable-lifecycle'
     ports:
       - 9090:9090
-
-  loki:
-    image: grafana/loki:2.6.0
-    container_name: loki
-    volumes:
-      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml
-    command: -config.file=/etc/loki/loki-config.yaml
-    expose:
-      - 3100
-    restart: unless-stopped
+    networks:
+      - api-gateway
+      - loki
+  
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    user: "root"
     ports:
-      - 3100:3100
-
-  promtail:
-    image: grafana/promtail:2.6.0
-    container_name: promtail
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /var/log:/var/log:ro
-      - ./promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml
-    command: -config.file=/etc/promtail/promtail-config.yaml
+      - 3000:3000
     restart: unless-stopped
-
-  pushgateway:
-    image: prom/pushgateway:v1.4.3
-    container_name: pushgateway
-    restart: always
-    expose:
-      - 9091
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy 
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
+    networks:
+      - api-gateway
+      - loki
 
   cadvisor:
     container_name: cadvisor

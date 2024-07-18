@@ -33,6 +33,20 @@ const isHeaderValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async
     }
 };
 
+const isParamValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { error } = schema.validate(req.params, { abortEarly: false });
+    if (error) {
+        const errorMessage = error.details.map((detail) => detail.message.replace(/"/g, '')).join(', ');
+        return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: errorMessage });
+      }
+
+    return next();
+    } catch (error: unknown) {    
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    }
+};
+
 const isUserExist = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userExist = await authRepositories.findUserByAttributes('email', req.body.email);
@@ -94,4 +108,4 @@ const isCredentialExist = async (req: any, res: Response, next: NextFunction) =>
     }
 };
   
-export { isBodyValidation, isHeaderValidation, isUserExist, isAccountVerified, isCredentialExist };
+export { isBodyValidation, isHeaderValidation, isParamValidation, isUserExist, isAccountVerified, isCredentialExist };

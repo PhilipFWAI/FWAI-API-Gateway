@@ -1,11 +1,8 @@
 auth_enabled: false
 
 server:
-  http_listen_address: 0.0.0.0
-  grpc_listen_address: 0.0.0.0
   http_listen_port: 3100
-  grpc_listen_port: 9095
-  log_level: info
+  grpc_listen_port: 9096
 
 common:
   path_prefix: /tmp/loki
@@ -28,10 +25,6 @@ schema_config:
       index:
         prefix: index_
         period: 24h
-
-limits_config:
-  ingestion_rate_mb: 1024
-  ingestion_burst_size_mb: 1024
 
 ruler:
   alertmanager_url: http://localhost:9093
