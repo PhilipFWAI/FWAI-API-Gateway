@@ -1,27 +1,26 @@
-import { Response } from 'express';
-import { ErrorResponseInterface, SuccessResponseInterface } from '../types/commonTypes';
+import { ErrorResponseInterface, SuccessResponseInterface } from '../types/responseTypes';
 
 class ResponseUtil {
     static message = '';
     static statusCode = 200;
-    static data: unknown = null;
-    static error: unknown = null;
+    static data: any = null;
+    static error: any = null;
     static type: 'success' | 'error' = 'success';
 
-    static handleSuccess(statusCode: number, message: string, data: unknown): void {
+    static handleSuccess(statusCode: number, message: string, data: any): void {
         this.statusCode = statusCode;
         this.message = message;
         this.data = data;
         this.type = 'success';
     }
 
-    static handleError(statusCode: number, message: string): void {
+    static handleError(statusCode: number, error: string): void {
         this.statusCode = statusCode;
-        this.message = message;
+        this.error = error;
         this.type = 'error';
     }
     
-    static response(res: Response): void {
+    static response(res): void {
         if (this.type === 'success') {
             const response: SuccessResponseInterface = {
                 status: this.statusCode,

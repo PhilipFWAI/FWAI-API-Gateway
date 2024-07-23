@@ -1,103 +1,64 @@
 import httpStatus from 'http-status';
-import { Request, Response } from 'express';
-import { ExtendRequest } from '../../../types/commonTypes';
+import responseUtils from '../../../utils/responseUtils';
 import stripeRepositories from '../repository/stripeRepositories';
 import { customerInfoUtil } from '../../../utils/customerInfoUtils';
 import { PriceInfoInterface, ProductInfoInterface } from '../../../types/strapiTypes';
 
-const stripeGetSubscription = async (req: ExtendRequest, res: Response) => {
-  try {
-    const subscription = await stripeRepositories.getStripeSubscriptionByAttribute('customer', req.params.customerId);
-
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe subscription proceed successfully.', data: { subscription } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
-  }
-};
-
-const stripeCustomer = async (req: ExtendRequest, res: Response) => {
-  try {
-    const customerInfo = await customerInfoUtil(req);
-    let customer = await stripeRepositories.getStripeCustomerByAttribute('email', customerInfo.email);
-    if (!customer) customer = await stripeRepositories.createStripeCustomer(customerInfo);
-
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe customer proceed successfully.', data: { customer } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
-  }
-};
-
-const stripePlan = async (req: ExtendRequest, res: Response) => {
+const stripePlan = async (req, res) => {
   try {
     let product: ProductInfoInterface = await stripeRepositories.getStripeProductByAttribute('name', req.body.planInfo.name);
     if (!product) product = await stripeRepositories.createStripeProduct(req.body.planInfo);
 
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe plan proceed successfully.', data: { product } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    responseUtils.handleSuccess(httpStatus.OK, 'Stripe plan proceed successfully.', { product });
+    return responseUtils.response(res);
+  } catch (error) {
+      responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+      return responseUtils.response(res);
   }
 };
 
-const stripePrice = async (req: ExtendRequest, res: Response) => {
+const stripeCheckoutSession = async (req, res) => {
   try {
-    let price: PriceInfoInterface = await stripeRepositories.getStripePricesByAttribute('product', req.body.priceInfo.product);
-    if (!price) price = await stripeRepositories.createStripePrice(req.body.priceInfo);
+    let customer = await stripeRepositories.getStripeCustomerByAttribute('email', req.body.sessionInfo.customer_email);
+    if (!customer) customer = await stripeRepositories.createStripeCustomer({ email: req.body.sessionInfo.customer_email });
 
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe price proceed successfully.', data: { price } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
-  }
-};
-
-const stripeCheckoutSession = async (req: ExtendRequest, res: Response) => {
-  try {
-    let session = await stripeRepositories.getStripeSessionByAttribute('customer', req.body.sessionInfo.customer);
-    delete req.body.sessionInfo.subscription;
-    if (!session) session = await stripeRepositories.createStripeSession(req.body.sessionInfo);
-
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe payment checked-out proceed successfully.', data: { session } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
-  }
-};
-
-const stripeCheckoutSessionCompleteFlow = async (req: ExtendRequest, res: Response) => {
-  try {
-    const customerInfo = await customerInfoUtil(req);
-    let customer = await stripeRepositories.getStripeCustomerByAttribute('email', customerInfo.email);
-    if (!customer) customer = await stripeRepositories.createStripeCustomer(customerInfo);
-
-    let product: ProductInfoInterface = await stripeRepositories.getStripeProductByAttribute('name', req.body.planInfo.name);
-    if (!product) product = await stripeRepositories.createStripeProduct(req.body.planInfo);
-
-    req.body.priceInfo.product = product.id;
-    let price: PriceInfoInterface = await stripeRepositories.getStripePricesByAttribute('product', req.body.priceInfo.product);
-    if (!price) price = await stripeRepositories.createStripePrice(req.body.priceInfo);
-
+    delete req.body.sessionInfo.customer_email;
     req.body.sessionInfo.customer = customer.id;
     let session = await stripeRepositories.getStripeSessionByAttribute('customer', customer.id);
     if (!session) session = await stripeRepositories.createStripeSession(req.body.sessionInfo);
-
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe payment checked-out proceed successfully.', data: { session, customer, product, price } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    
+    responseUtils.handleSuccess(httpStatus.OK, 'Stripe payment checked-out proceed successfully.', { session });
+    return responseUtils.response(res);
+  } catch (error) {
+      responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+      return responseUtils.response(res);
   }
 };
 
-const stripeCheckoutSucceeded = async (req: Request, res: Response) => {
+const stripeGetSubscription = async (req, res) => {
   try {
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe payment proceed successfully.' });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    let customer = await stripeRepositories.getStripeCustomerByAttribute('email', req.query.email);
+    if (!customer) customer = await stripeRepositories.createStripeCustomer({ email: req.query.email });
+
+    const subscription = await stripeRepositories.getStripeSubscriptionByAttribute('customer', customer.id);
+    responseUtils.handleSuccess(httpStatus.OK, 'Stripe subscription proceed successfully.', { subscription });
+    return responseUtils.response(res);
+  } catch (error) {
+      responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+      return responseUtils.response(res);
   }
 };
 
-const stripeCheckoutCancelled = async (req: Request, res: Response) => {
+const stripeGetProducts = async (req, res) => {
   try {
-    return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Stripe payment cancelled successfully.' });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    const products = await stripeRepositories.getStripeProducts();
+
+    responseUtils.handleSuccess(httpStatus.OK, 'Stripe products proceed successfully.', { products });
+    return responseUtils.response(res);
+  } catch (error) {
+      responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+      return responseUtils.response(res);
   }
 };
 
-export default { stripeGetSubscription, stripeCustomer, stripePlan, stripePrice, stripeCheckoutSession, stripeCheckoutSessionCompleteFlow, stripeCheckoutSucceeded, stripeCheckoutCancelled };
+export default { stripeGetSubscription, stripePlan, stripeCheckoutSession, stripeGetProducts };

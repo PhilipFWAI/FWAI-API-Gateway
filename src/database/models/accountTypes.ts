@@ -1,5 +1,5 @@
-import { Sequelize, Model, DataTypes } from 'sequelize';
 import { AccountTypesInterface } from '../../types/modelsTypes';
+import { Sequelize, Model, DataTypes } from 'sequelize';
 
 module.exports = (sequelize: Sequelize) => {
     class AccountTypes extends Model<AccountTypesInterface> 

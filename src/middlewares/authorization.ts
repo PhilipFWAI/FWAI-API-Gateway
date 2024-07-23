@@ -1,34 +1,47 @@
 import httpStatus from 'http-status';
 import { verifyToken } from '../utils/jwtUtils';
-import { Response, NextFunction } from 'express';
+import responseUtils from '../utils/responseUtils';
 import { SessionInterface } from '../types/modelsTypes';
 import authRepositories from '../modules/auth/repository/authRepositories';
+import { ID, USER_ID,ACCESS_TOKEN, DEVICE_ID } from '../utils/variablesUtils';
 
-export const gatewayAuthorization = function (accountTypes: string[]) {
-    return async (req: any, res: Response, next: NextFunction) => {
-        try {
-            let session: SessionInterface;
-            const deviceId = JSON.stringify(req.headers['user-device']);
-            const authorizationToken = req.header('gateway-authorization').replace('Bearer ', '');
-            if (!authorizationToken) return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.UNAUTHORIZED, error: 'Not authorized' });
-
-            const verifiedToken = await verifyToken(authorizationToken, process.env.JWT_SECRET as string);
-            
-            if(!deviceId)  session = await authRepositories.findSessionByAttributes('user_id', verifiedToken.id, 'access_token', authorizationToken);
-            if (deviceId) session = await authRepositories.findSessionByTripleAttributes('user_id', verifiedToken.id, 'access_token', authorizationToken, 'device_id', deviceId);
-
-            if (!session) return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.UNAUTHORIZED, error: 'Not authorized, already logged out' });
-
-            const user = await authRepositories.findUserByAttributes('id', verifiedToken.id );
-            if (!user) return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.NOT_FOUND, error: 'Not authorized' });
-            
-            if (!accountTypes.includes(user.accountType_id.toString())) return res.status(httpStatus.UNAUTHORIZED).json({ status: httpStatus.UNAUTHORIZED, message: 'Not authorized' });
-
-            req.user = user;
-            req.session = session;
-            next();
-        } catch (error: unknown) {    
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+export const gatewayAuthorization = async (req, res, next) => {
+    try {
+        let session: SessionInterface;
+        const deviceId = JSON.stringify(req.headers['user-device']);
+        const authorizationToken = req.header('Authorization').replace('Bearer ', '');
+        if (!authorizationToken) {
+            responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Not authorized');
+            return responseUtils.response(res);
         }
-  };
+
+        const verifiedToken = await verifyToken(authorizationToken, process.env.JWT_SECRET as string);
+        
+        if(!deviceId)  session = await authRepositories.findSessionByAttributes({ primaryKey: USER_ID, primaryValue: verifiedToken.id, secondaryKey: ACCESS_TOKEN, secondaryValue: authorizationToken });
+        if (deviceId) session = await authRepositories.findSessionByTripleAttributes({ primaryKey: USER_ID, primaryValue: verifiedToken.id, secondaryKey: ACCESS_TOKEN, secondaryValue: authorizationToken, tripleKey: DEVICE_ID, tripleValue: deviceId });
+
+        if (!session) {
+            responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Not authorized, already logged out');
+            return responseUtils.response(res);
+        }
+
+        const user = await authRepositories.findUserByAttributes({ primaryKey: ID, primaryValue: verifiedToken.id });
+        if (!user) {
+            responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Not authorized');
+            return responseUtils.response(res);
+        }
+
+        const accountTypes: number[] = JSON.parse(process.env.ACCOUNT_TYPES);
+        if (!accountTypes.includes(user.accountType_id)) {
+            responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Not authorized');
+            return responseUtils.response(res);
+        }
+
+        req.session = session;
+        req.user = user;
+        return next();
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
+    }
 };

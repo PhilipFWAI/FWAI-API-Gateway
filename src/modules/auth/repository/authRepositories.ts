@@ -1,6 +1,6 @@
 import models from '../../../database/models/index';
 import { hashPassword } from '../../../utils/passwordUtils';
-import { SessionInterface, UsersInterface } from '../../../types/modelsTypes';
+import { FindByAttributesInterface, FindByTripleAttributesInterface, SessionInterface, UpdateByAttributesInterface, UsersInterface } from '../../../types/modelsTypes';
 
 const { users, sessions } = models;
 
@@ -9,28 +9,28 @@ const createUser = async (body: UsersInterface): Promise<UsersInterface> => {
     return await users.create({ ...body, isVerified: false });
 };
 
-const findUserByAttributes = async (primaryKey: string, primaryValue: number | string | boolean): Promise<UsersInterface> => {
+const findUserByAttributes = async ({ primaryKey, primaryValue }: FindByAttributesInterface): Promise<UsersInterface> => {
     return await users.findOne({ where: { [primaryKey]: primaryValue } });
 };
 
-const updateUserByAttributes = async (updatedKey: string, updatedValue: number | string | boolean, whereKey: string, whereValue: number | string | boolean): Promise<UsersInterface> => {
+const updateUserByAttributes = async ({ updatedKey, updatedValue, whereKey, whereValue }: UpdateByAttributesInterface): Promise<UsersInterface> => {
   await users.update({ [updatedKey]: updatedValue }, { where: { [whereKey]: whereValue } });
-  return await findUserByAttributes(whereKey, whereValue);
+  return await findUserByAttributes({ primaryKey: whereKey, primaryValue: whereValue });
 };
 
 const createSession = async (body: SessionInterface): Promise<SessionInterface> => {
     return await sessions.create(body);
 };
 
-const findSessionByAttributes = async (primaryKey: string, primaryValue: number | string | boolean, secondaryKey: string, secondaryValue: number | string | boolean): Promise<UsersInterface> => {
-    return await sessions.findOne({ where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue, } });
+const findSessionByAttributes = async ({ primaryKey, primaryValue, secondaryKey, secondaryValue }: FindByAttributesInterface): Promise<UsersInterface | null> => {
+    return await sessions.findOne({ where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue } });
 };
 
-const findSessionByTripleAttributes = async (primaryKey: string, primaryValue: number | string | boolean, secondaryKey: string, secondaryValue: number | string | boolean, extraKey: string, extraValue: number | string | boolean): Promise<UsersInterface> => {
-    return await sessions.findOne({ where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue, [extraKey]: extraValue } });
+const findSessionByTripleAttributes = async ({ primaryKey, primaryValue, secondaryKey, secondaryValue, tripleKey, tripleValue }: FindByTripleAttributesInterface): Promise<UsersInterface> => {
+    return await sessions.findOne({ where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue, [tripleKey]: tripleValue } });
 };
 
-const destroySessionByAttribute = async (primaryKey: string, primaryValue: number | string, secondaryKey: string, secondaryValue: string): Promise<void> => {
+const destroySessionByAttribute = async ({ primaryKey, primaryValue, secondaryKey, secondaryValue }: FindByAttributesInterface): Promise<void> => {
     await sessions.destroy({where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue }});
 };
 

@@ -1,14 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import * as dbConnection from '../configs/config';
-import { DBInterface, DBConfigInterface } from '../../types/modelsTypes';
 import { Sequelize, DataTypes, Model, ModelStatic } from 'sequelize';
+import { DBInterface, DBConfigInterface } from '../../types/modelsTypes';
 
 const db: Partial<DBInterface> = {};
 let sequelize: Sequelize;
 const basename = path.basename(__filename);
-const env: string = process.env.NODE_ENV || 'development';
-const config = dbConnection[env as keyof typeof dbConnection] as DBConfigInterface;
+const config = dbConnection as DBConfigInterface;
 
 if (config.url) {
     sequelize = new Sequelize(config.url, config);

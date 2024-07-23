@@ -1,5 +1,5 @@
-import { Sequelize, Model, DataTypes } from 'sequelize';
 import { SessionInterface } from '../../types/modelsTypes';
+import { Sequelize, Model, DataTypes } from 'sequelize';
 
 module.exports = (sequelize: Sequelize) => {
     class sessions extends Model<SessionInterface> 

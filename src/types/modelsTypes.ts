@@ -42,3 +42,26 @@ export interface SessionInterface {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+export interface FindByAttributesInterface {
+    primaryKey: string;
+    primaryValue: number | string | boolean;
+    secondaryKey?: string;
+    secondaryValue?: number | string | boolean;
+}
+
+export interface FindByTripleAttributesInterface {
+    primaryKey: string;
+    primaryValue: number | string | boolean;
+    secondaryKey: string;
+    secondaryValue: number | string | boolean;
+    tripleKey: string;
+    tripleValue: number | string | boolean;
+}
+
+export interface UpdateByAttributesInterface {
+    updatedKey: string;
+    updatedValue: number | string | boolean;
+    whereKey?: string;
+    whereValue?: number | string | boolean;
+}

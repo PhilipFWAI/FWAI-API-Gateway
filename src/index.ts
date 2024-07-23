@@ -1,9 +1,9 @@
-import express, { Express, Request, Response } from 'express';
-import { corsOptions } from './utils/corsOptionsUtils';
-import httpStatus from 'http-status';
-import router from './routes';
-import dotenv from 'dotenv';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import router from './routes';
+import httpStatus from 'http-status';
+import express, { Express } from 'express';
+import { corsOptions } from './utils/corsOptionsUtils';
 
 dotenv.config();
 const app: Express = express();
@@ -19,7 +19,7 @@ app.listen(PORT, () => {
   console.log(`GATEWAY IS RUNNING ON PORT ${PORT}`);
 });
 
-app.get('**', (req: Request, res: Response) => {
+app.get('**', (req, res) => {
   res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'WELCOME TO OUR APIs GATEWAY.' });
 });
 

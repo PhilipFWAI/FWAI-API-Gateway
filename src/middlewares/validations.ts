@@ -1,97 +1,146 @@
 import Joi from 'joi';
 import httpStatus from 'http-status';
 import { verifyToken } from '../utils/jwtUtils';
+import responseUtils from '../utils/responseUtils';
 import { comparePassword } from '../utils/passwordUtils';
-import { Request, Response, NextFunction } from 'express';
 import authRepositories from '../modules/auth/repository/authRepositories';
+import accountRepositories from '../modules/account/repository/accountRepositories';
+import { ACCESS_TOKEN, ACCOUNT_TYPE, DEVICE_ID, EMAIL, ID, USER_ID } from '../utils/variablesUtils';
 
-const isBodyValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { error } = schema.validate(req.body, { abortEarly: false });
-      if (error) {
-        const errorMessage = error.details.map((detail) => detail.message.replace(/"/g, '')).join(', ');
-        return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: errorMessage });
-      }
-  
-      return next();
-    } catch (error: unknown) {    
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
-    }
-};
-
-const isHeaderValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req: Request, res: Response, next: NextFunction) => {
+const isHeaderValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
     try {
         const { error } = schema.validate(req.headers, { abortEarly: false });
         if (error) {
-          const errorMessage = error.details.map((detail) => detail.message.replace(/"/g, '')).join(', ');
-          return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: errorMessage });
+            const errorMessage = `${error.details[0].message} in the headers`;
+            responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+            return responseUtils.response(res);
         }
     
         return next();
-    } catch (error: unknown) {    
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
     }
 };
 
-const isParamValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req: Request, res: Response, next: NextFunction) => {
+const isParamValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
   try {
     const { error } = schema.validate(req.params, { abortEarly: false });
     if (error) {
-        const errorMessage = error.details.map((detail) => detail.message.replace(/"/g, '')).join(', ');
-        return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: errorMessage });
-      }
+        const errorMessage = `${error.details[0].message} in the params`;
+        responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+        return responseUtils.response(res);
+    }
 
     return next();
-    } catch (error: unknown) {    
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
     }
 };
 
-const isUserExist = async (req: Request, res: Response, next: NextFunction) => {
+const isQueryValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
+  try {
+    const { error } = schema.validate(req.query, { abortEarly: false });
+    if (error) {
+        const errorMessage = `${error.details[0].message} in the query params`;
+        responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+        return responseUtils.response(res);
+    }
+
+    return next();
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
+    }
+};
+
+const isBodyValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
     try {
-        const userExist = await authRepositories.findUserByAttributes('email', req.body.email);
+      const { error } = schema.validate(req.body, { abortEarly: false });
+      if (error) {
+        const errorMessage = `${error.details[0].message} in the body`;
+        responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+        return responseUtils.response(res);
+      }
+  
+      return next();
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
+    }
+};
+
+const isUserExist = async (req, res, next) => {
+    try {
+        const userExist = await authRepositories.findUserByAttributes({ primaryKey: EMAIL, primaryValue: req.body.email });
         if (userExist) {
             if (userExist.isVerified) {
-                return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR,  error: 'Account already exists.', });
+                responseUtils.handleError(httpStatus.BAD_REQUEST, 'Account already exists.');
+                return responseUtils.response(res);
             }
 
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error: 'Account already exists. Please verify your account.' });
+            responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Account already exists. Please verify your account.');
+            return responseUtils.response(res);
         }
   
         return next();
-    } catch (error: unknown) {    
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
     }
 };
 
-const isAccountVerified = async (req: any, res: Response, next: NextFunction) => {
+const isAccountVerified = async (req, res, next) => {
     try {
       const verifiedToken = await verifyToken(req.params.access_token, process.env.JWT_SECRET as string);
-      const session = await authRepositories.findSessionByAttributes('user_id', verifiedToken.id, 'access_token', req.params.access_token);
-      if (!session) return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: 'Email verification link expired or invalid.' });
+      const session = await authRepositories.findSessionByAttributes({ primaryKey: USER_ID, primaryValue: verifiedToken.id, secondaryKey: ACCESS_TOKEN, secondaryValue: req.params.access_token });
+      if (!session) {
+        responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Email verification link expired or invalid.');
+        return responseUtils.response(res);
+      }
   
-      const user = await authRepositories.findUserByAttributes('id', verifiedToken.id );
-      if (!user) return res.status(httpStatus.NOT_FOUND).json({ status: httpStatus.NOT_FOUND, error: 'Account email not found.' });
-      if (user.isVerified) return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: 'Account already verified, now login' });
+      const user = await authRepositories.findUserByAttributes({ primaryKey: ID, primaryValue: verifiedToken.id });
+      if (!user) {
+        responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Account email not found.');
+        return responseUtils.response(res);
+      }
+
+      if (user.isVerified) {
+        responseUtils.handleError(httpStatus.BAD_REQUEST, 'Account already verified, now login');
+        return responseUtils.response(res);
+      }
   
       req.session = session;
       req.user = user;
-      next();
-    } catch (error: unknown) {    
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+      return next();
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
     }
 };
 
-const isCredentialExist = async (req: any, res: Response, next: NextFunction) => {
+const isCredentialExist = async (req, res, next) => {
     try {
         const deviceId = JSON.stringify(req.headers['user-device']);
-        const user = await authRepositories.findUserByAttributes('email', req.body.email);
-        if (!user) return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: 'Invalid username or password' });
+        const user = await authRepositories.findUserByAttributes({ primaryKey: EMAIL, primaryValue: req.body.email });
+        if (!user) {
+            responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+            return responseUtils.response(res);
+        }
+        
+        if (!user.isVerified) {
+            responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Account is not verified. Please verify your account to login.');
+            return responseUtils.response(res);
+        }
 
         const passwordMatches = await comparePassword(req.body.password, user.password);
-        if (!passwordMatches) return res.status(httpStatus.BAD_REQUEST).json({ status: httpStatus.BAD_REQUEST, error: 'Invalid username or password' });
+        if (!passwordMatches) {
+            responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+            return responseUtils.response(res);
+        }
 
-        const session = await authRepositories.findSessionByAttributes('user_id', user.id, 'device_id', deviceId);
+        const session = await authRepositories.findSessionByAttributes({ primaryKey: USER_ID, primaryValue: user.id, secondaryKey: DEVICE_ID, secondaryValue: deviceId });
         if (!session) {
             req.user = user;
             req.session = null;
@@ -103,9 +152,25 @@ const isCredentialExist = async (req: any, res: Response, next: NextFunction) =>
         req.session = session;
         req.deviceId = deviceId;
         return next();
-    } catch (error: unknown) {    
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
+    }
+};
+
+const isAccountTypeExist = async (req, res, next) => {
+    try {
+        const accountTypeExist = await accountRepositories.findAccountTypeByAttributes({ primaryKey: ACCOUNT_TYPE, primaryValue: req.body.accountType });
+        if (accountTypeExist) {
+            responseUtils.handleError(httpStatus.BAD_REQUEST, 'Account type already exists.');
+            return responseUtils.response(res);
+        }
+  
+        return next();
+    } catch (error) {    
+        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
     }
 };
   
-export { isBodyValidation, isHeaderValidation, isParamValidation, isUserExist, isAccountVerified, isCredentialExist };
+export { isHeaderValidation, isParamValidation, isQueryValidation, isBodyValidation, isUserExist, isAccountVerified, isCredentialExist, isAccountTypeExist };

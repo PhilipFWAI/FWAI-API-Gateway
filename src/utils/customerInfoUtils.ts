@@ -1,7 +1,6 @@
-import { ExtendRequest } from '../types/commonTypes';
 import { CustomerInterface } from '../types/strapiTypes';
 
-export const customerInfoUtil = async (req: ExtendRequest): Promise<CustomerInterface>=> {
+export const customerInfoUtil = async (req): Promise<CustomerInterface>=> {
     let customerInfo: CustomerInterface;
     if (req.body.customerInfo && req.body.customerInfo.email) {
       customerInfo = req.body.customerInfo;

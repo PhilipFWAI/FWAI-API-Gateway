@@ -4,10 +4,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "deleteAllTables": "tsc && npx sequelize db:migrate:undo:all",
-    "deleteAllSeeds": "tsc && npx sequelize db:seed:undo:all",
     "createAllTables": "tsc && npx sequelize db:migrate",
-    "createAllSeeds": "tsc && npx sequelize db:seed:all",
     "kill-window": "Taskkill /IM node.exe /F",
     "start": "nodemon ./src/index",
     "dev": "nodemon ./src/index",

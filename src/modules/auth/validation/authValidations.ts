@@ -22,14 +22,6 @@ const signupSchema = Joi.object({
   }),
 });
 
-const userDeviceSchema = Joi.object().keys({
-  'user-device': Joi.string().required().messages({
-      'any.required': 'User-Device is required in the headers',
-      'string.base': 'User-Device should be a type of text in the headers',
-      'string.empty': 'User-Device cannot be an empty field in the headers',
-  }),
-}).unknown(true);
-
 const signinSchema = Joi.object({
   email: Joi.string().email().required().messages({
       'string.base': 'email should be a type of text',
@@ -46,12 +38,28 @@ const signinSchema = Joi.object({
   }),
 });
 
-const gatewayAuthorizationSchema = Joi.object().keys({
-  'gateway-authorization': Joi.string().required().messages({
-      'any.required': 'Gateway-Authorization is required in the headers',
-      'string.base': 'Gateway-Authorization should be a type of text in the headers',
-      'string.empty': 'Gateway-Authorization cannot be an empty field in the headers',
+const userDeviceSchema = Joi.object().keys({
+  'user-device': Joi.string().required().messages({
+      'any.required': 'User-Device is required',
+      'string.base': 'User-Device should be a type of text',
+      'string.empty': 'User-Device cannot be an empty field',
+  }),
+}).unknown(true);
+
+const authorizationSchema = Joi.object().keys({
+  'authorization': Joi.string().required().messages({
+      'any.required': 'Authorization is required',
+      'string.base': 'Authorization should be a type of text',
+      'string.empty': 'Authorization cannot be an empty field',
   })
 }).unknown(true);
 
-export { signupSchema, userDeviceSchema, signinSchema, gatewayAuthorizationSchema };
+const accessTokenSchema = Joi.object({
+  access_token: Joi.string().required().messages({
+    'any.required': 'access_token is required',
+    'string.base': 'access_token should be a type of text',
+    'string.empty': 'access_token cannot be an empty field',
+  }),
+});
+
+export { signupSchema, signinSchema, userDeviceSchema, authorizationSchema, accessTokenSchema };

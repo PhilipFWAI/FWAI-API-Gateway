@@ -1,55 +1,87 @@
 import httpStatus from 'http-status';
-import { Request, Response } from 'express';
-import sendEmail from '../../../services/sendEmail';
+import responseUtils from '../../../utils/responseUtils';
 import authRepositories from '../repository/authRepositories';
+import { smtpGmailSendEmail } from './../../../services/sendEmail';
 import { generateAccessToken, generateRefreshToken } from '../../../utils/jwtUtils';
+import { ACCESS_TOKEN, ID, IS_VERIFIED, USER_ID } from './../../../utils/variablesUtils';
 
-const signup = async (req: Request, res: Response) => {
+const signup = async (req, res) => {
   try {
     const user = await authRepositories.createUser(req.body);
+    const deviceId = JSON.stringify(req.headers['user-device']);
 
     const refreshToken: string = generateRefreshToken(42);
-    const deviceId = JSON.stringify(req.headers['user-device']);
     const accessToken: string = generateAccessToken(user.id, process.env.JWT_SECRET as string);
-    await authRepositories.createSession({ user_id: user.id, device_id: deviceId, access_token: accessToken, refresh_token: refreshToken });
-    await sendEmail(`${process.env.API_GATEWAY_BASE_URL}/api-gateway/auth/verify-email/${accessToken}`, 'Verification Account',  user.email, user.password );
 
-    return res.status(httpStatus.CREATED).json({ status: httpStatus.CREATED, message: 'Account created successfully. Please check Email Box to verify account.', data: { user } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    const session = {
+      user_id: user.id,
+      device_id: deviceId,
+      access_token: accessToken,
+      refresh_token: refreshToken
+    };
+    await authRepositories.createSession(session);
+
+    const email = {
+      receiverEmail: user.email,
+      action: 'Verification Account',
+      url: `${process.env.API_GATEWAY_BASE_URL}/api-gateway/auth/verify-email/${accessToken}`,
+    };
+    await smtpGmailSendEmail(email);
+
+    responseUtils.handleSuccess(httpStatus.CREATED, 'Account created successfully. Please check Email Box to verify account.', { user });
+    return responseUtils.response(res);
+  } catch (error) {    
+    responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+    return responseUtils.response(res);
   }
 };
 
-const verifyEmail = async (req: any, res: Response) => {
+const verifyEmail = async (req, res) => {
   try {
-    await authRepositories.updateUserByAttributes('isVerified', true, 'id', req.user.id);
-    await authRepositories.destroySessionByAttribute('user_id', req.user.id, 'access_token', req.session.access_token);
-    res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Account verified successfully, now login' });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    await authRepositories.updateUserByAttributes({ updatedKey: IS_VERIFIED, updatedValue: true, whereKey: ID, whereValue: req.user.id });
+    await authRepositories.destroySessionByAttribute({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: ACCESS_TOKEN, secondaryValue: req.session.access_token });
+
+    responseUtils.handleSuccess(httpStatus.OK, 'Account verified successfully, now you can login', {});
+    return responseUtils.response(res);
+  } catch (error) {    
+    responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+    return responseUtils.response(res);
   }
 };
 
-const signin = async (req: any, res: Response) => {
+const signin = async (req, res) => {
   try {
     if (req.session) return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Logged in successfully', data: { user: req.user, session: req.session } });
 
     const refreshToken: string = generateRefreshToken(42);
     const accessToken: string = generateAccessToken(req.user.id, process.env.JWT_SECRET as string);
-    const session = await authRepositories.createSession({ user_id: req.user.id, device_id: req.deviceId, access_token: accessToken, refresh_token: refreshToken });
 
-    res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Logged in successfully', data: { user: req.user, session  } });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    const sessionBody = {
+      user_id: req.user.id,
+      device_id: req.deviceId,
+      access_token: accessToken,
+      refresh_token: refreshToken
+    };
+
+    const session = await authRepositories.createSession(sessionBody);
+    
+    responseUtils.handleSuccess(httpStatus.OK, 'Logged in successfully', { user: req.user, session });
+    return responseUtils.response(res);
+  } catch (error) {    
+    responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+    return responseUtils.response(res);
   }
 };
 
-const signout = async (req: any, res: Response) => {
+const signout = async (req, res) => {
   try {
-    await authRepositories.destroySessionByAttribute('user_id', req.user.id, 'access_token', req.session.access_token);
-    res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Successfully logged out' });
-  } catch (error: unknown) {    
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ status: httpStatus.INTERNAL_SERVER_ERROR, error });
+    await authRepositories.destroySessionByAttribute({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: ACCESS_TOKEN, secondaryValue : req.session.access_token });
+    
+    responseUtils.handleSuccess(httpStatus.OK, 'Logged out Successfully', {});
+    return responseUtils.response(res);
+  } catch (error) {    
+    responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+    return responseUtils.response(res);
   }
 };
 

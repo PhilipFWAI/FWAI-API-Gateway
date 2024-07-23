@@ -1,5 +1,5 @@
-import { Sequelize, Model, DataTypes } from 'sequelize';
 import { UsersInterface } from '../../types/modelsTypes';
+import { Sequelize, Model, DataTypes } from 'sequelize';
 
 
 
