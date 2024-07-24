@@ -1,24 +1,24 @@
-import { Sequelize, Model, DataTypes, ModelCtor } from 'sequelize';
-import { SessionInterface } from '../../types/modelTypes';
+import { SessionInterface } from '../../types/modelsTypes';
+import { Sequelize, Model, DataTypes } from 'sequelize';
 
 module.exports = (sequelize: Sequelize) => {
     class sessions extends Model<SessionInterface> 
         implements SessionInterface {
-            declare userId: number;
-            declare deviceId: string;
+            declare user_id: number;
+            declare device_id: string;
             declare access_token: string;
             declare refresh_token: string;
             declare createdAt: Date;
             declare updatedAt: Date;
-            static associate (models: { [key: string]: ModelCtor<Model> }) {
-                sessions.belongsTo(models.users, { as: 'user', foreignKey: 'userId' });
+            static associate (models) {
+                sessions.belongsTo(models.users, { as: 'user', foreignKey: 'user_id' });
             }
         }
     
     sessions.init(
         {
-            userId: { type: DataTypes.INTEGER },
-            deviceId: { type: DataTypes.STRING },
+            user_id: { type: DataTypes.INTEGER },
+            device_id: { type: DataTypes.STRING },
             access_token: { type: DataTypes.STRING },
             refresh_token: { type: DataTypes.STRING },
             createdAt: { field: 'createdAt', type: DataTypes.DATE },

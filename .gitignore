@@ -1,3 +1,5 @@
+src/database/migrations/
+src/database/seeders/
 node_modules/
 .env
 dist

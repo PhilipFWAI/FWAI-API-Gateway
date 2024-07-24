@@ -1,19 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import * as dbConnection from '../configs/config';
-import { DB, DBConfig } from '../../types/modelTypes';
 import { Sequelize, DataTypes, Model, ModelStatic } from 'sequelize';
+import { DBInterface, DBConfigInterface } from '../../types/modelsTypes';
 
-const db: Partial<DB> = {};
+const db: Partial<DBInterface> = {};
 let sequelize: Sequelize;
 const basename = path.basename(__filename);
-const env: string = process.env.NODE_ENV || 'development';
-const config = dbConnection[env as keyof typeof dbConnection] as DBConfig;
+const config = dbConnection as DBConfigInterface;
 
 if (config.url) {
     sequelize = new Sequelize(config.url, config);
 } else {
-    if (!config.database || !config.username || !config.password) {
+    if (!config.username || !config.password) {
         throw new Error('Database configuration is incomplete.');
     }
     sequelize = new Sequelize(config.database, config.username, config.password, config);
@@ -29,13 +28,13 @@ fs.readdirSync(__dirname)
     });
 
 Object.keys(db).forEach((modelName) => {
-    const model = db[modelName] as ModelStatic<Model> & { associate?: (db: DB) => void };
+    const model = db[modelName] as ModelStatic<Model> & { associate?: (db: DBInterface) => void };
     if (model.associate) {
-        model.associate(db as DB);
+        model.associate(db as DBInterface);
     }
 });
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-export default db as DB;
+export default db as DBInterface;
