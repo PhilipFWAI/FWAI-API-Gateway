@@ -1,13 +1,13 @@
 import httpStatus from 'http-status';
 import responseUtils from '../../../utils/responseUtils';
-import authRepositories from '../repository/authRepositories';
-import { smtpGmailSendEmail } from './../../../services/sendEmail';
+import authRepository from '../repository/authRepository';
+import { smtpGmailSendEmail } from '../../../services/sendEmail';
 import { generateAccessToken, generateRefreshToken } from '../../../utils/jwtUtils';
-import { ACCESS_TOKEN, ID, IS_VERIFIED, USER_ID } from './../../../utils/variablesUtils';
+import { ACCESS_TOKEN, ID, IS_VERIFIED, USER_ID } from '../../../utils/variablesUtils';
 
 const signup = async (req, res) => {
   try {
-    const user = await authRepositories.createUser(req.body);
+    const user = await authRepository.createUser(req.body);
     const deviceId = JSON.stringify(req.headers['user-device']);
 
     const refreshToken: string = generateRefreshToken();
@@ -19,7 +19,7 @@ const signup = async (req, res) => {
       access_token: accessToken,
       refresh_token: refreshToken
     };
-    await authRepositories.createSession(session);
+    await authRepository.createSession(session);
 
     const email = {
       receiverEmail: user.email,
@@ -38,8 +38,8 @@ const signup = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   try {
-    await authRepositories.updateUserByAttributes({ updatedKey: IS_VERIFIED, updatedValue: true, whereKey: ID, whereValue: req.user.id });
-    await authRepositories.destroySessionByAttribute({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: ACCESS_TOKEN, secondaryValue: req.session.access_token });
+    await authRepository.updateUserByAttributes({ updatedKey: IS_VERIFIED, updatedValue: true, whereKey: ID, whereValue: req.user.id });
+    await authRepository.destroySessionByAttribute({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: ACCESS_TOKEN, secondaryValue: req.session.access_token });
 
     responseUtils.handleSuccess(httpStatus.OK, 'Account verified successfully, now you can login', {});
     return responseUtils.response(res);
@@ -63,7 +63,7 @@ const signin = async (req, res) => {
       refresh_token: refreshToken
     };
 
-    const session = await authRepositories.createSession(sessionBody);
+    const session = await authRepository.createSession(sessionBody);
     
     responseUtils.handleSuccess(httpStatus.OK, 'Logged in successfully', { user: req.user, session });
     return responseUtils.response(res);
@@ -75,7 +75,7 @@ const signin = async (req, res) => {
 
 const signout = async (req, res) => {
   try {
-    await authRepositories.destroySessionByAttribute({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: ACCESS_TOKEN, secondaryValue : req.session.access_token });
+    await authRepository.destroySessionByAttribute({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: ACCESS_TOKEN, secondaryValue : req.session.access_token });
     
     responseUtils.handleSuccess(httpStatus.OK, 'Logged out Successfully', {});
     return responseUtils.response(res);

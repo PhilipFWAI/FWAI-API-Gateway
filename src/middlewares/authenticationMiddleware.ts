@@ -2,10 +2,10 @@ import httpStatus from 'http-status';
 import { verifyToken } from '../utils/jwtUtils';
 import responseUtils from '../utils/responseUtils';
 import { SessionInterface } from '../types/modelsTypes';
-import authRepositories from '../modules/auth/repository/authRepositories';
+import authRepository from '../modules/auth/repository/authRepository';
 import { ID, USER_ID,ACCESS_TOKEN, DEVICE_ID } from '../utils/variablesUtils';
 
-export const gatewayAuthorization = async (req, res, next) => {
+export const gatewayAuthentication = async (req, res, next) => {
     try {
         let session: SessionInterface;
         const deviceId = JSON.stringify(req.headers['user-device']);
@@ -17,15 +17,15 @@ export const gatewayAuthorization = async (req, res, next) => {
 
         const verifiedToken = await verifyToken(authorizationToken, process.env.JWT_SECRET as string);
         
-        if(!deviceId)  session = await authRepositories.findSessionByAttributes({ primaryKey: USER_ID, primaryValue: verifiedToken.id, secondaryKey: ACCESS_TOKEN, secondaryValue: authorizationToken });
-        if (deviceId) session = await authRepositories.findSessionByTripleAttributes({ primaryKey: USER_ID, primaryValue: verifiedToken.id, secondaryKey: ACCESS_TOKEN, secondaryValue: authorizationToken, tripleKey: DEVICE_ID, tripleValue: deviceId });
+        if(!deviceId)  session = await authRepository.findSessionByAttributes({ primaryKey: USER_ID, primaryValue: verifiedToken.id, secondaryKey: ACCESS_TOKEN, secondaryValue: authorizationToken });
+        if (deviceId) session = await authRepository.findSessionByTripleAttributes({ primaryKey: USER_ID, primaryValue: verifiedToken.id, secondaryKey: ACCESS_TOKEN, secondaryValue: authorizationToken, tripleKey: DEVICE_ID, tripleValue: deviceId });
 
         if (!session) {
             responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Not authorized, already logged out');
             return responseUtils.response(res);
         }
 
-        const user = await authRepositories.findUserByAttributes({ primaryKey: ID, primaryValue: verifiedToken.id });
+        const user = await authRepository.findUserByAttributes({ primaryKey: ID, primaryValue: verifiedToken.id });
         if (!user) {
             responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Not authorized');
             return responseUtils.response(res);

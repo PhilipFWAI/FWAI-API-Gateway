@@ -1,13 +1,12 @@
 import httpStatus from 'http-status';
 import responseUtils from '../../../utils/responseUtils';
-import stripeRepositories from '../repository/stripeRepositories';
-import { customerInfoUtil } from '../../../utils/customerInfoUtils';
-import { PriceInfoInterface, ProductInfoInterface } from '../../../types/strapiTypes';
+import stripeRepository from '../repository/stripeRepository';
+import { ProductInfoInterface } from '../../../types/strapiTypes';
 
-const stripePlan = async (req, res) => {
+const stripecreateProduct = async (req, res) => {
   try {
-    let product: ProductInfoInterface = await stripeRepositories.getStripeProductByAttribute('name', req.body.planInfo.name);
-    if (!product) product = await stripeRepositories.createStripeProduct(req.body.planInfo);
+    let product: ProductInfoInterface = await stripeRepository.getStripeProductByAttribute('name', req.body.planInfo.name);
+    if (!product) product = await stripeRepository.createStripeProduct(req.body.planInfo);
 
     responseUtils.handleSuccess(httpStatus.OK, 'Stripe plan proceed successfully.', { product });
     return responseUtils.response(res);
@@ -19,13 +18,13 @@ const stripePlan = async (req, res) => {
 
 const stripeCheckoutSession = async (req, res) => {
   try {
-    let customer = await stripeRepositories.getStripeCustomerByAttribute('email', req.body.sessionInfo.customer_email);
-    if (!customer) customer = await stripeRepositories.createStripeCustomer({ email: req.body.sessionInfo.customer_email });
+    let customer = await stripeRepository.getStripeCustomerByAttribute('email', req.body.sessionInfo.customer_email);
+    if (!customer) customer = await stripeRepository.createStripeCustomer({ email: req.body.sessionInfo.customer_email });
 
     delete req.body.sessionInfo.customer_email;
     req.body.sessionInfo.customer = customer.id;
-    let session = await stripeRepositories.getStripeSessionByAttribute('customer', customer.id);
-    if (!session) session = await stripeRepositories.createStripeSession(req.body.sessionInfo);
+    let session = await stripeRepository.getStripeSessionByAttribute('customer', customer.id);
+    if (!session) session = await stripeRepository.createStripeSession(req.body.sessionInfo);
     
     responseUtils.handleSuccess(httpStatus.OK, 'Stripe payment checked-out proceed successfully.', { session });
     return responseUtils.response(res);
@@ -37,10 +36,10 @@ const stripeCheckoutSession = async (req, res) => {
 
 const stripeGetSubscription = async (req, res) => {
   try {
-    let customer = await stripeRepositories.getStripeCustomerByAttribute('email', req.query.email);
-    if (!customer) customer = await stripeRepositories.createStripeCustomer({ email: req.query.email });
+    let customer = await stripeRepository.getStripeCustomerByAttribute('email', req.query.email);
+    if (!customer) customer = await stripeRepository.createStripeCustomer({ email: req.query.email });
 
-    const subscription = await stripeRepositories.getStripeSubscriptionByAttribute('customer', customer.id);
+    const subscription = await stripeRepository.getStripeSubscriptionByAttribute('customer', customer.id);
     responseUtils.handleSuccess(httpStatus.OK, 'Stripe subscription proceed successfully.', { subscription });
     return responseUtils.response(res);
   } catch (error) {
@@ -51,7 +50,7 @@ const stripeGetSubscription = async (req, res) => {
 
 const stripeGetProducts = async (req, res) => {
   try {
-    const products = await stripeRepositories.getStripeProducts();
+    const products = await stripeRepository.getStripeProducts();
 
     responseUtils.handleSuccess(httpStatus.OK, 'Stripe products proceed successfully.', { products });
     return responseUtils.response(res);
@@ -61,4 +60,4 @@ const stripeGetProducts = async (req, res) => {
   }
 };
 
-export default { stripeGetSubscription, stripePlan, stripeCheckoutSession, stripeGetProducts };
+export default { stripeGetSubscription, stripecreateProduct, stripeCheckoutSession, stripeGetProducts };
