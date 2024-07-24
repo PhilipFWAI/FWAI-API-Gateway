@@ -10,7 +10,7 @@ const signup = async (req, res) => {
     const user = await authRepositories.createUser(req.body);
     const deviceId = JSON.stringify(req.headers['user-device']);
 
-    const refreshToken: string = generateRefreshToken(42);
+    const refreshToken: string = generateRefreshToken();
     const accessToken: string = generateAccessToken(user.id, process.env.JWT_SECRET as string);
 
     const session = {
@@ -53,7 +53,7 @@ const signin = async (req, res) => {
   try {
     if (req.session) return res.status(httpStatus.OK).json({ status: httpStatus.OK, message: 'Logged in successfully', data: { user: req.user, session: req.session } });
 
-    const refreshToken: string = generateRefreshToken(42);
+    const refreshToken: string = generateRefreshToken();
     const accessToken: string = generateAccessToken(req.user.id, process.env.JWT_SECRET as string);
 
     const sessionBody = {
