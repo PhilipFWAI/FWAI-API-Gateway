@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import authRouters from './authRouters';
-import stripeRouters from './stripeRouters';
-import accountTypeRouters from './accountTypeRouters';
+import authRoute from './authRoute';
+import stripeRoute from './stripeRoute';
+import accountTypeRoute from './accountTypeRoute';
 
 const router: Router = Router();
-router.use('/auth', authRouters);
-router.use('/stripe', stripeRouters);
-router.use('/account-type', accountTypeRouters);
+router.use('/auth', authRoute);
+router.use('/stripe', stripeRoute);
+router.use('/account-type', accountTypeRoute);
 
 export default router;

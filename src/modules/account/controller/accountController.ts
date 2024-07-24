@@ -1,10 +1,10 @@
 import httpStatus from 'http-status';
 import responseUtils from '../../../utils/responseUtils';
-import accountRepositories from '../repository/accountRepositories';
+import accountRepository from '../repository/accountRepository';
 
 const createAccountType = async (req, res) => {
   try {
-    const accountType = await accountRepositories.createAccountType(req.body);
+    const accountType = await accountRepository.createAccountType(req.body);
 
     responseUtils.handleSuccess(httpStatus.CREATED, 'Account type created successfully.', { accountType });
     return responseUtils.response(res);
@@ -16,7 +16,7 @@ const createAccountType = async (req, res) => {
 
 const getAccountTypes = async (req, res) => {
   try {
-    const accountTypes = await accountRepositories.getAccountTypes();
+    const accountTypes = await accountRepository.getAccountTypes();
     
     responseUtils.handleSuccess(httpStatus.OK, 'Account types viewed successfully', { accountTypes });
     return responseUtils.response(res);
