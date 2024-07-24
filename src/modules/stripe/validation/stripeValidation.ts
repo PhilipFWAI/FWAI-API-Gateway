@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-const planDetailsSchema = Joi.object({
+const productDetailsSchema = Joi.object({
   planInfo: Joi.object().required().keys({
     name: Joi.string().required().messages({
       'any.required': 'name is required and is plan name',
@@ -113,4 +113,4 @@ const emailSchema = Joi.object({
       'any.required': 'email is required'
   }),
 });
-export { planDetailsSchema, checkoutSessionSchema, emailSchema };
+export { productDetailsSchema, checkoutSessionSchema, emailSchema };
