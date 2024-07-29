@@ -58,11 +58,33 @@ const googleGetSpreadSheet = async (googleOauth2Client: OAuth2Client, fileId): P
     return data;
 };
 
+const googleAppendSpreadSheetData = async (googleOauth2Client: OAuth2Client, spreadsheetId, range, values): Promise<sheets_v4.Schema$AppendValuesResponse> => {
+    const googleSheet = await google.sheets({ version: 'v4', auth: googleOauth2Client });
+    const body = { spreadsheetId, range, valueInputOption: 'RAW', insertDataOption: 'INSERT_ROWS', resource: { values } };
+
+    const { data } = await googleSheet.spreadsheets.values.append(body);
+    return data;
+};
+
 const googleGetSpreadSheetData = async (googleOauth2Client: OAuth2Client, spreadsheetId, range): Promise<sheets_v4.Schema$ValueRange> => {
     const googleSheet = await google.sheets({ version: 'v4', auth: googleOauth2Client });
     const { data } = await googleSheet.spreadsheets.values.get({ spreadsheetId, range });
     return data;
 };
+
+const googleUpdateSpreadSheetData = async (googleOauth2Client: OAuth2Client, spreadsheetId, range, values): Promise<sheets_v4.Schema$UpdateValuesResponse> => {
+    const googleSheet = await google.sheets({ version: 'v4', auth: googleOauth2Client });
+    const body = { spreadsheetId, range, valueInputOption: 'RAW', requestBody: { values } };
+
+    const { data } = await googleSheet.spreadsheets.values.update(body);
+    return data;
+};
+
+const googleClearSpreadSheetData = async (googleOauth2Client: OAuth2Client, spreadsheetId, range) => {
+    const googleSheet = await google.sheets({ version: 'v4', auth: googleOauth2Client });
+    await googleSheet.spreadsheets.values.clear({ spreadsheetId, range });
+};
+
 
 export default {
     googleListCalendars,
@@ -73,5 +95,8 @@ export default {
     googleListEventByEventIdAndCalendar,
     googleListSpreadSheets,
     googleGetSpreadSheet,
-    googleGetSpreadSheetData
+    googleAppendSpreadSheetData,
+    googleGetSpreadSheetData,
+    googleUpdateSpreadSheetData,
+    googleClearSpreadSheetData
 };
