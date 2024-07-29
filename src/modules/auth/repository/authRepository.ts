@@ -1,4 +1,4 @@
-import models from '../../../database/models/index';
+import models from '../../../database/models';
 import { hashPassword } from '../../../utils/passwordUtils';
 import { FindByAttributesInterface, FindByTripleAttributesInterface, SessionInterface, UpdateByAttributesInterface, UsersInterface } from '../../../types/modelsTypes';
 

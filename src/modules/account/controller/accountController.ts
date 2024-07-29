@@ -9,7 +9,7 @@ const createAccountType = async (req, res) => {
     responseUtils.handleSuccess(httpStatus.CREATED, 'Account type created successfully.', { accountType });
     return responseUtils.response(res);
   } catch (error) {    
-    responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+    responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
     return responseUtils.response(res);
   }
 };
@@ -21,7 +21,7 @@ const getAccountTypes = async (req, res) => {
     responseUtils.handleSuccess(httpStatus.OK, 'Account types viewed successfully', { accountTypes });
     return responseUtils.response(res);
   } catch (error) {    
-    responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+    responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
     return responseUtils.response(res);
   }
 };

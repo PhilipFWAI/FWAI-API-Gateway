@@ -113,4 +113,5 @@ const emailSchema = Joi.object({
       'any.required': 'email is required'
   }),
 });
+
 export { productDetailsSchema, checkoutSessionSchema, emailSchema };

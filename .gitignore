@@ -1,5 +1,7 @@
 src/database/migrations/
 src/database/seeders/
 node_modules/
+
+packageScript.json
 .env
 dist
