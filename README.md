@@ -1,4 +1,5 @@
 # FWAI API GATEWAY
+
 This Gateway provide a single entry point for managing all inbound and outbound Third-Party API requests.
 
 ## KEY FEATURES GATEWAY PERFORM:
@@ -30,6 +31,7 @@ This Gateway provide a single entry point for managing all inbound and outbound 
 ## COMPLETED INTEGRATIONS:
 
 ### STRIPE
+
 1. Create Plan/Product
 
 2. List Plans/Products
@@ -39,6 +41,7 @@ This Gateway provide a single entry point for managing all inbound and outbound 
 4. Checkout Session
 
 ### GOOGLE CALENDAR
+
 1. Get Access Token
 
 2. Refresh Access Token
