@@ -31,17 +31,28 @@ This Gateway provide a single entry point for managing all inbound and outbound 
 
 ### STRIPE
 1. Create Plan/Product
+
 2. List Plans/Products
+
 3. List Subscriptions
+
+4. Checkout Session
 
 ### GOOGLE CALENDAR
 1. Get Access Token
+
 2. Refresh Access Token
+
 3. List Calendars
+
 4. Create Calendar Event
+
 5. List Calendar Events
+
 6. Get Calendar Event
+
 7. Update Calendar Event
+
 8. Cancel Calendar Event
 
 ## INSTALLATION AND DB SETUP
