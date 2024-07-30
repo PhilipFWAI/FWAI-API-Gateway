@@ -3,5 +3,6 @@ src/database/seeders/
 node_modules/
 
 packageScript.json
+.vscode
 .env
 dist

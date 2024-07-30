@@ -2,7 +2,7 @@ import { Router } from 'express';
 import googleController from '../modules/google/controller/googleController';
 import { authorizationSchema } from '../modules/auth/validation/authValidation';
 import { isBodyValidation, isHeaderValidation, isQueryValidation } from '../middlewares/requestMiddleware';
-import { codeSchema, createEventschema, listEventschema, refreshAccessTokenSchema } from '../modules/google/validation/googleValidation';
+import { codeSchema, createEventSchema, getSpreadSheetDataSchema, listEventsSchema, listSpreadSheetsSchema, refreshAccessTokenSchema } from '../modules/google/validation/googleValidation';
 
 const router: Router = Router();
 
@@ -12,9 +12,13 @@ router.get('/refresh-access-token', isQueryValidation(refreshAccessTokenSchema),
 
 router.get('/calendars', isHeaderValidation(authorizationSchema), googleController.googleListCalendars);
 router.get('/event/:eventId/:calendarId', isHeaderValidation(authorizationSchema), googleController.googleListEvent);
-router.delete('/event/:eventId/:calendarId', isHeaderValidation(authorizationSchema), googleController.googleDeleteEvent);
-router.get('/events', isHeaderValidation(authorizationSchema), isQueryValidation(listEventschema), googleController.googleListEvents);
-router.post('/event', isHeaderValidation(authorizationSchema), isBodyValidation(createEventschema), googleController.googleCreateEvent);
 router.put('/event/:eventId/:calendarId', isHeaderValidation(authorizationSchema), googleController.googleUpdateEvent);
+router.delete('/event/:eventId/:calendarId', isHeaderValidation(authorizationSchema), googleController.googleDeleteEvent);
+router.get('/events', isHeaderValidation(authorizationSchema), isQueryValidation(listEventsSchema), googleController.googleListEvents);
+router.post('/event', isHeaderValidation(authorizationSchema), isBodyValidation(createEventSchema), googleController.googleCreateEvent);
+
+router.get('/spread-sheet/:fileId', isHeaderValidation(authorizationSchema), googleController.googleGetSpreadSheet);
+router.get('/spread-sheets', isHeaderValidation(authorizationSchema), isQueryValidation(listSpreadSheetsSchema), googleController.googleListSpreadSheets);
+router.get('/spread-sheet-data/:fileId', isHeaderValidation(authorizationSchema), isQueryValidation(getSpreadSheetDataSchema), googleController.googleGetSpreadSheetData);
 
 export default router;

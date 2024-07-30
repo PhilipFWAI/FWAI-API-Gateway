@@ -1,7 +1,7 @@
-import { google, calendar_v3  } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
+import { google, calendar_v3, drive_v3, sheets_v4  } from 'googleapis';
 
-const getGoogleCalendars = async (googleOauth2Client: OAuth2Client): Promise<calendar_v3.Schema$CalendarList>  => {
+const googleListCalendars = async (googleOauth2Client: OAuth2Client): Promise<calendar_v3.Schema$CalendarList>  => {
     const googleCalendar = await google.calendar({ version: 'v3', auth: googleOauth2Client });
     const { data } = await googleCalendar.calendarList.list();
     return data;
@@ -41,11 +41,37 @@ const googleDeleteEvent = async (googleOauth2Client: OAuth2Client, params): Prom
     await googleCalendar.events.delete(params);
 };
 
+const googleListSpreadSheets = async (googleOauth2Client: OAuth2Client, query): Promise<drive_v3.Schema$FileList> => {
+    const googleDrive = await google.drive({ version: 'v3', auth: googleOauth2Client });
+    const { data } = await googleDrive.files.list({
+        pageSize: query.pageSize,
+        pageToken: query.nextPageToken,
+        fields: 'nextPageToken, files(id, name, webViewLink)',
+        q: 'mimeType=\'application/vnd.google-apps.spreadsheet\'',
+    });
+    return data;
+};
+
+const googleGetSpreadSheet = async (googleOauth2Client: OAuth2Client, fileId): Promise<drive_v3.Schema$File> => {
+    const googleDrive = await google.drive({ version: 'v3', auth: googleOauth2Client });
+    const { data } = await googleDrive.files.get({ fileId, fields: 'kind, id, name, mimeType, size, createdTime , modifiedTime, webViewLink, owners' });
+    return data;
+};
+
+const googleGetSpreadSheetData = async (googleOauth2Client: OAuth2Client, spreadsheetId, range): Promise<sheets_v4.Schema$ValueRange> => {
+    const googleSheet = await google.sheets({ version: 'v4', auth: googleOauth2Client });
+    const { data } = await googleSheet.spreadsheets.values.get({ spreadsheetId, range });
+    return data;
+};
+
 export default {
-    getGoogleCalendars,
+    googleListCalendars,
     googleCreateEvent,
     googleListEvents,
     googleUpdateEvent,
     googleDeleteEvent,
     googleListEventByEventIdAndCalendar,
+    googleListSpreadSheets,
+    googleGetSpreadSheet,
+    googleGetSpreadSheetData
 };

@@ -58,6 +58,12 @@ This Gateway provide a single entry point for managing all inbound and outbound 
 
 8. Cancel Calendar Event
 
+9. List Spread Sheets
+
+10. Get Spread Sheet
+
+11. Get Spread Sheet Data
+
 ## INSTALLATION AND DB SETUP
 
 1. Clone the repository: ```git clone git@github.com:PhilipFWAI/FWAI-API-Gateway.git```
