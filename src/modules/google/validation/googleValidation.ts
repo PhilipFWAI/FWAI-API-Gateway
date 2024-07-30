@@ -21,7 +21,7 @@ const refreshAccessTokenSchema = Joi.object({
   })
 });
 
-const createEventschema = Joi.object({
+const createEventSchema = Joi.object({
   calendarId: Joi.string().messages({
     'any.required': 'calendarId is required',
     'string.base': 'calendarId must be a string',
@@ -127,7 +127,7 @@ const createEventschema = Joi.object({
   }),
 });
 
-const listEventschema = Joi.object({
+const listEventsSchema = Joi.object({
   calendarId: Joi.string().required().messages({
     'any.required': 'calendarId is required',
     'string.base': 'calendarId must be a string',
@@ -151,4 +151,25 @@ const listEventschema = Joi.object({
   }),
 });
 
-export { codeSchema, refreshAccessTokenSchema, createEventschema, listEventschema };
+const listSpreadSheetsSchema =  Joi.object({
+  pageSize: Joi.string().required().messages({
+    'any.required': 'pageSize is required',
+    'string.base': 'pageSize must be a string',
+    'string.empty': 'pageSize is is not allowed to be empty',
+  }),
+  nextPageToken: Joi.string().messages({
+    'any.required': 'nextPageToken is required and is event name',
+    'string.base': 'nextPageToken must be a string and is event name',
+    'date.empty': 'nextPageToken is not allowed to be empty and is event name',
+  }),
+});
+
+const getSpreadSheetDataSchema =  Joi.object({
+  range: Joi.string().required().messages({
+    'any.required': 'range is required ex: Sheet1!A1:D10',
+    'string.base': 'range must be a string ex: Sheet1!A1:D10',
+    'string.empty': 'range is is not allowed to be empty ex: Sheet1!A1:D10',
+  }),
+});
+
+export { codeSchema, refreshAccessTokenSchema, createEventSchema, listEventsSchema, listSpreadSheetsSchema, getSpreadSheetDataSchema };

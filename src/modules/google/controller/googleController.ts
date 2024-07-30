@@ -46,7 +46,7 @@ const googleRefreshAccessToken = async (req, res) => {
 const googleListCalendars = async (req, res) => {
     try {
         googleOauth2Client.setCredentials({ access_token: req.header('Authorization').replace('Bearer ', '') });
-        const calendars = await googleRepository.getGoogleCalendars(googleOauth2Client);
+        const calendars = await googleRepository.googleListCalendars(googleOauth2Client);
 
         responseUtils.handleSuccess(httpStatus.OK, 'Success.',  { calendars });
         return responseUtils.response(res);
@@ -140,4 +140,56 @@ const googleDeleteEvent = async (req, res) => {
     }
 };
 
-export default { googleAuth, googleAuthCallback, googleRefreshAccessToken, googleListCalendars, googleCreateEvent, googleListEvents, googleListEvent, googleUpdateEvent, googleDeleteEvent };
+const googleListSpreadSheets = async (req, res) => {
+    try {
+        googleOauth2Client.setCredentials({ access_token: req.header('Authorization').replace('Bearer ', '') });
+        const data = await googleRepository.googleListSpreadSheets(googleOauth2Client, req.query);
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.',  { data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const googleGetSpreadSheet = async (req, res) => {
+    try {
+        googleOauth2Client.setCredentials({ access_token: req.header('Authorization').replace('Bearer ', '') });
+        const data = await googleRepository.googleGetSpreadSheet(googleOauth2Client, req.params.fileId);
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.',  { data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const googleGetSpreadSheetData = async (req, res) => {
+try {
+    googleOauth2Client.setCredentials({ access_token: req.header('Authorization').replace('Bearer ', '') });
+    const data = await googleRepository.googleGetSpreadSheetData(googleOauth2Client, req.params.fileId, req.query.range);
+
+    responseUtils.handleSuccess(httpStatus.OK, 'Success.',  { data });
+    return responseUtils.response(res);
+} catch (error) {
+    responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error.toString());
+    return responseUtils.response(res);
+}
+};
+
+export default {
+    googleAuth,
+    googleAuthCallback,
+    googleRefreshAccessToken,
+    googleListCalendars,
+    googleCreateEvent,
+    googleListEvents,
+    googleListEvent,
+    googleUpdateEvent,
+    googleDeleteEvent,
+    googleListSpreadSheets,
+    googleGetSpreadSheet,
+    googleGetSpreadSheetData
+};
