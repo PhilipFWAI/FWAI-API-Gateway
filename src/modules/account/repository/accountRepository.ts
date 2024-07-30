@@ -1,4 +1,4 @@
-import models from '../../../database/models/index';
+import models from '../../../database/models';
 import { AccountTypesInterface, FindByAttributesInterface } from '../../../types/modelsTypes';
 
 const { accountTypes } = models;

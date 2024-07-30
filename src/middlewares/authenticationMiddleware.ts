@@ -41,7 +41,7 @@ export const gatewayAuthentication = async (req, res, next) => {
         req.user = user;
         return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };

@@ -9,8 +9,8 @@ const verifyToken = (token: string, key: string): JwtPayload => {
   return verify(token, key) as JwtPayload;
 };
 
-const generateRefreshToken = (): string => {
+const generateRandomString = (): string => {
   return randomstring.generate(process.env.RANDOM_STRING_LENGTH);
 };
 
-export { generateAccessToken, verifyToken, generateRefreshToken };
+export { generateAccessToken, verifyToken, generateRandomString };
