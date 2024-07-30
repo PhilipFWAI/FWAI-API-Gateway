@@ -8,10 +8,10 @@ const stripecreateProduct = async (req, res) => {
     let product: ProductInfoInterface = await stripeRepository.getStripeProductByAttribute('name', req.body.planInfo.name);
     if (!product) product = await stripeRepository.createStripeProduct(req.body.planInfo);
 
-    responseUtils.handleSuccess(httpStatus.OK, 'Stripe plan proceed successfully.', { product });
+    responseUtils.handleSuccess(httpStatus.OK, 'Success.', { product });
     return responseUtils.response(res);
   } catch (error) {
-      responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+      responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
       return responseUtils.response(res);
   }
 };
@@ -26,10 +26,10 @@ const stripeCheckoutSession = async (req, res) => {
     let session = await stripeRepository.getStripeSessionByAttribute('customer', customer.id);
     if (!session) session = await stripeRepository.createStripeSession(req.body.sessionInfo);
     
-    responseUtils.handleSuccess(httpStatus.OK, 'Stripe payment checked-out proceed successfully.', { session });
+    responseUtils.handleSuccess(httpStatus.OK, 'Success.', { session });
     return responseUtils.response(res);
   } catch (error) {
-      responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+      responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
       return responseUtils.response(res);
   }
 };
@@ -40,10 +40,10 @@ const stripeGetSubscription = async (req, res) => {
     if (!customer) customer = await stripeRepository.createStripeCustomer({ email: req.query.email });
 
     const subscription = await stripeRepository.getStripeSubscriptionByAttribute('customer', customer.id);
-    responseUtils.handleSuccess(httpStatus.OK, 'Stripe subscription proceed successfully.', { subscription });
+    responseUtils.handleSuccess(httpStatus.OK, 'Success.', { subscription });
     return responseUtils.response(res);
   } catch (error) {
-      responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+      responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
       return responseUtils.response(res);
   }
 };
@@ -52,10 +52,10 @@ const stripeGetProducts = async (req, res) => {
   try {
     const products = await stripeRepository.getStripeProducts();
 
-    responseUtils.handleSuccess(httpStatus.OK, 'Stripe products proceed successfully.', { products });
+    responseUtils.handleSuccess(httpStatus.OK, 'Success.', { products });
     return responseUtils.response(res);
   } catch (error) {
-      responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+      responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
       return responseUtils.response(res);
   }
 };

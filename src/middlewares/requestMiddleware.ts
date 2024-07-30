@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import httpStatus from 'http-status';
 import responseUtils from '../utils/responseUtils';
+import googleRepository from '../modules/google/repository/googleRepository';
 
 const isHeaderValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
     try {
@@ -13,7 +14,7 @@ const isHeaderValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async
     
         return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };
@@ -29,7 +30,7 @@ const isParamValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async 
 
     return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };
@@ -45,7 +46,7 @@ const isQueryValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async 
 
     return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };
@@ -61,10 +62,9 @@ const isBodyValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (
   
       return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };
 
-  
 export { isHeaderValidation, isParamValidation, isQueryValidation, isBodyValidation };

@@ -22,7 +22,7 @@ const isUserExist = async (req, res, next) => {
   
         return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };
@@ -51,7 +51,7 @@ const isAccountVerified = async (req, res, next) => {
       req.user = user;
       return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };
@@ -89,7 +89,7 @@ const isCredentialExist = async (req, res, next) => {
         req.deviceId = deviceId;
         return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };
@@ -104,7 +104,7 @@ const isAccountTypeExist = async (req, res, next) => {
   
         return next();
     } catch (error) {    
-        responseUtils.handleError(httpStatus.INTERNAL_SERVER_ERROR, error);
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
         return responseUtils.response(res);
     }
 };
