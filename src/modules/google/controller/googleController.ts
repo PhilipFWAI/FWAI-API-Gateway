@@ -46,7 +46,7 @@ const googleRefreshAccessToken = async (req, res) => {
 const googleListCalendars = async (req, res) => {
     try {
         googleOauth2Client.setCredentials({ access_token: req.header('Authorization').replace('Bearer ', '') });
-        const calendars = await googleRepository.googleListCalendars(googleOauth2Client);
+        const calendars = await googleRepository.getGoogleCalendars(googleOauth2Client);
 
         responseUtils.handleSuccess(httpStatus.OK, 'Success.',  { calendars });
         return responseUtils.response(res);

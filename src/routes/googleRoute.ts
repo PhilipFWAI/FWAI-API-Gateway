@@ -4,6 +4,7 @@ import { authorizationSchema } from '../modules/auth/validation/authValidation';
 import { isBodyValidation, isHeaderValidation, isQueryValidation } from '../middlewares/requestMiddleware';
 import { codeSchema, createEventSchema, getSpreadSheetDataSchema, listEventsSchema, listSpreadSheetsSchema, refreshAccessTokenSchema } from '../modules/google/validation/googleValidation';
 
+
 const router: Router = Router();
 
 router.get('/auth-code', googleController.googleAuth);
@@ -20,5 +21,6 @@ router.post('/event', isHeaderValidation(authorizationSchema), isBodyValidation(
 router.get('/spread-sheet/:fileId', isHeaderValidation(authorizationSchema), googleController.googleGetSpreadSheet);
 router.get('/spread-sheets', isHeaderValidation(authorizationSchema), isQueryValidation(listSpreadSheetsSchema), googleController.googleListSpreadSheets);
 router.get('/spread-sheet-data/:fileId', isHeaderValidation(authorizationSchema), isQueryValidation(getSpreadSheetDataSchema), googleController.googleGetSpreadSheetData);
+
 
 export default router;
