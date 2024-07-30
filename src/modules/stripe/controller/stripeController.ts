@@ -1,11 +1,10 @@
 import httpStatus from 'http-status';
 import responseUtils from '../../../utils/responseUtils';
 import stripeRepository from '../repository/stripeRepository';
-import { ProductInfoInterface } from '../../../types/strapiTypes';
 
-const stripecreateProduct = async (req, res) => {
+const stripeCreateProduct = async (req, res) => {
   try {
-    let product: ProductInfoInterface = await stripeRepository.getStripeProductByAttribute('name', req.body.planInfo.name);
+    let product = await stripeRepository.getStripeProductByAttribute('name', req.body.planInfo.name);
     if (!product) product = await stripeRepository.createStripeProduct(req.body.planInfo);
 
     responseUtils.handleSuccess(httpStatus.OK, 'Success.', { product });
@@ -60,4 +59,4 @@ const stripeGetProducts = async (req, res) => {
   }
 };
 
-export default { stripeGetSubscription, stripecreateProduct, stripeCheckoutSession, stripeGetProducts };
+export default { stripeGetSubscription, stripeCreateProduct, stripeCheckoutSession, stripeGetProducts };

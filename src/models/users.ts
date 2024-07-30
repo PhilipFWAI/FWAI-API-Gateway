@@ -1,7 +1,5 @@
-import { UsersInterface } from '../../types/modelsTypes';
+import { UsersInterface } from './index';
 import { Sequelize, Model, DataTypes } from 'sequelize';
-
-
 
 module.exports = (sequelize: Sequelize) => {
     class users extends Model<UsersInterface>

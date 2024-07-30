@@ -1,4 +1,4 @@
-import { AccountTypesInterface } from '../../types/modelsTypes';
+import { AccountTypesInterface } from './index';
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
 module.exports = (sequelize: Sequelize) => {

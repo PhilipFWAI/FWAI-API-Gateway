@@ -1,4 +1,7 @@
-import { Sequelize, Dialect } from 'sequelize';
+import fs from 'fs';
+import path from 'path';
+import * as dbConnection from '../configs/config';
+import { Sequelize, DataTypes, Model, ModelStatic, Dialect } from 'sequelize';
 
 export interface DBInterface {
     [key: string]: any;
@@ -17,12 +20,6 @@ export interface DBConfigInterface {
     logging?: boolean | ((sql: string, timing?: number) => void);
 }
 
-export interface AccountTypesInterface {
-    accountType: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
-
 export interface UsersInterface {
     id?: number;
     accountType_id: number;
@@ -39,6 +36,12 @@ export interface SessionInterface {
     device_id?: string,
     access_token?: string,
     refresh_token?: string,
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+export interface AccountTypesInterface {
+    accountType: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -65,3 +68,38 @@ export interface UpdateByAttributesInterface {
     whereKey?: string;
     whereValue?: number | string | boolean;
 }
+
+const db: Partial<DBInterface> = {};
+let sequelize: Sequelize;
+const basename = path.basename(__filename);
+const config = dbConnection as DBConfigInterface;
+
+if (config.url) {
+    sequelize = new Sequelize(config.url, config);
+} else {
+    if (!config.username || !config.password) {
+        throw new Error('Database configuration is incomplete.');
+    }
+    sequelize = new Sequelize(config.database, config.username, config.password, config);
+}
+
+fs.readdirSync(__dirname)
+    .filter((file: string) => {
+        return file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.ts';
+    })
+    .forEach((file: string) => {
+        const model = require(path.join(__dirname, file))(sequelize, DataTypes) as ModelStatic<Model>;
+        db[model.name] = model;
+    });
+
+Object.keys(db).forEach((modelName) => {
+    const model = db[modelName] as ModelStatic<Model> & { associate?: (db: DBInterface) => void };
+    if (model.associate) {
+        model.associate(db as DBInterface);
+    }
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+export default db as DBInterface;

@@ -1,4 +1,4 @@
-import { SessionInterface } from '../../types/modelsTypes';
+import { SessionInterface } from './index';
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
 module.exports = (sequelize: Sequelize) => {
