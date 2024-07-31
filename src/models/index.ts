@@ -1,13 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import * as dbConnection from '../configs/config';
+import { DBInterface, DBConfigInterface } from './interfaces';
 import { Sequelize, DataTypes, Model, ModelStatic } from 'sequelize';
-import { DBInterface, DBConfigInterface } from '../../types/modelsTypes';
 
 const db: Partial<DBInterface> = {};
 let sequelize: Sequelize;
 const basename = path.basename(__filename);
-const config = dbConnection as DBConfigInterface;
+const config = require('../configs/config') as DBConfigInterface;
 
 if (config.url) {
     sequelize = new Sequelize(config.url, config);
@@ -23,8 +22,16 @@ fs.readdirSync(__dirname)
         return file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.ts';
     })
     .forEach((file: string) => {
-        const model = require(path.join(__dirname, file))(sequelize, DataTypes) as ModelStatic<Model>;
-        db[model.name] = model;
+        const modelPath = path.join(__dirname, file);
+        const modelDefiner = require(modelPath).default as (sequelize: Sequelize, dataTypes: typeof DataTypes) => ModelStatic<Model>;
+
+        if (typeof modelDefiner === 'function') {
+            const model = modelDefiner(sequelize, DataTypes);
+            db[model.name] = model;
+        } else {
+            if (file !== 'interfaces.ts')
+                console.error(`The file ${file} does not export a function.`);
+        }
     });
 
 Object.keys(db).forEach((modelName) => {

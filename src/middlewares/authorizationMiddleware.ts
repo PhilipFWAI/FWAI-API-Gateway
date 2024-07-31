@@ -11,7 +11,7 @@ const isUserExist = async (req, res, next) => {
     try {
         const userExist = await authRepository.findUserByAttributes({ primaryKey: EMAIL, primaryValue: req.body.email });
         if (userExist) {
-            if (userExist.isVerified) {
+            if (userExist.is_verified) {
                 responseUtils.handleError(httpStatus.BAD_REQUEST, 'Account already exists.');
                 return responseUtils.response(res);
             }
@@ -42,7 +42,7 @@ const isAccountVerified = async (req, res, next) => {
         return responseUtils.response(res);
       }
 
-      if (user.isVerified) {
+      if (user.is_verified) {
         responseUtils.handleError(httpStatus.BAD_REQUEST, 'Account already verified, now login');
         return responseUtils.response(res);
       }
@@ -65,7 +65,7 @@ const isCredentialExist = async (req, res, next) => {
             return responseUtils.response(res);
         }
         
-        if (!user.isVerified) {
+        if (!user.is_verified) {
             responseUtils.handleError(httpStatus.UNAUTHORIZED, 'Account is not verified. Please verify your account to login.');
             return responseUtils.response(res);
         }
