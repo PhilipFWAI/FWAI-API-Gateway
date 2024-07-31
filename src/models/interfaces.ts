@@ -17,28 +17,30 @@ export interface DBConfigInterface {
     logging?: boolean | ((sql: string, timing?: number) => void);
 }
 
-export interface AccountTypesInterface {
-    accountType: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
-
 export interface UsersInterface {
     id?: number;
     accountType_id: number;
     username: string;
     email: string;
     password: string;
-    isVerified: boolean;
+    is_verified: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 export interface SessionInterface {
+    id?: number;
     user_id?: number,
     device_id?: string,
     access_token?: string,
     refresh_token?: string,
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+export interface AccountTypesInterface {
+    id?: number;
+    accountType: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -7,7 +7,7 @@ const router: Router = Router();
 
 router.get('/products', stripeController.stripeGetProducts);
 router.get('/subscriptions', isQueryValidation(emailSchema), stripeController.stripeGetSubscription);
-router.post('/product', isBodyValidation(productDetailsSchema), stripeController.stripecreateProduct);
+router.post('/product', isBodyValidation(productDetailsSchema), stripeController.stripeCreateProduct);
 router.post('/checkout-session', isBodyValidation(checkoutSessionSchema), stripeController.stripeCheckoutSession);
 
 export default router;

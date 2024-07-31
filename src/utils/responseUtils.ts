@@ -1,5 +1,12 @@
-import { ErrorResponseInterface, SuccessResponseInterface } from '../types/responseTypes';
-
+export interface SuccessResponseInterface {
+    message: string;
+    status: number;
+    data: unknown;
+}
+export interface ErrorResponseInterface {
+    status: number;
+    error: any;
+}
 class ResponseUtil {
     static message = '';
     static statusCode = 200;

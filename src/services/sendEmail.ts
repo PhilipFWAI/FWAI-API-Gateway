@@ -1,9 +1,13 @@
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import { verifyAccountTemplate } from '../utils/emailTemplateUtils';
-import { EmailInterface } from '../types/emailTypes';
 
 dotenv.config();
+export interface EmailInterface {
+  receiverEmail: string;
+  action: string;
+  url?: string;
+}
 
 export const smtpGmailSendEmail = async (email: EmailInterface): Promise<void> => {
   const transporter = await nodemailer.createTransport({

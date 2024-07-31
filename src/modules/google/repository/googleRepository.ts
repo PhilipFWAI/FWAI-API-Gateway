@@ -1,8 +1,7 @@
-
 import { OAuth2Client } from 'google-auth-library';
 import { google, calendar_v3, drive_v3, sheets_v4  } from 'googleapis';
 
-const getGoogleCalendars = async (googleOauth2Client: OAuth2Client): Promise<calendar_v3.Schema$CalendarList>  => {
+const googleListCalendars = async (googleOauth2Client: OAuth2Client): Promise<calendar_v3.Schema$CalendarList>  => {
     const googleCalendar = await google.calendar({ version: 'v3', auth: googleOauth2Client });
     const { data } = await googleCalendar.calendarList.list();
     return data;
