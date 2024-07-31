@@ -1,6 +1,6 @@
 # FWAI API GATEWAY
 
-This Gateway provide a single entry point for managing all inbound and outbound Third-Party API requests.
+This Gateway provides a single entry point for managing all inbound and outbound Third-Party API requests.
 
 ## KEY FEATURES GATEWAY PERFORM:
 
@@ -40,7 +40,9 @@ This Gateway provide a single entry point for managing all inbound and outbound 
 
 4. Checkout Session
 
-### GOOGLE CALENDAR
+### GOOGLE
+
+#### Google Calendar
 
 1. Get Access Token
 
@@ -58,11 +60,14 @@ This Gateway provide a single entry point for managing all inbound and outbound 
 
 8. Cancel Calendar Event
 
-9. List Spread Sheets
 
-10. Get Spread Sheet
+#### Google Spreadsheets
 
-11. Get Spread Sheet Data
+1. List Spread Sheets
+
+2. Get Spread Sheet
+
+3. Get Spread Sheet Data
 
 ## INSTALLATION AND DB SETUP
 
