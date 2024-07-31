@@ -1,4 +1,5 @@
-import models, { FindByAttributesInterface, AccountTypesInterface } from '../../../models';
+import models from '../../../models';
+import { FindByAttributesInterface, AccountTypesInterface } from '../../../models/interfaces';
 
 const createAccountType = async (body: AccountTypesInterface): Promise<AccountTypesInterface> => {
     return await models.accountTypes.create(body);

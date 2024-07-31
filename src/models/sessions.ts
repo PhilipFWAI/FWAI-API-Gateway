@@ -1,29 +1,30 @@
-import { SessionInterface } from './index';
+import { SessionInterface } from './interfaces';
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
-module.exports = (sequelize: Sequelize) => {
-    class sessions extends Model<SessionInterface> 
-        implements SessionInterface {
-            declare user_id: number;
-            declare device_id: string;
-            declare access_token: string;
-            declare refresh_token: string;
-            declare createdAt: Date;
-            declare updatedAt: Date;
-            static associate (models) {
-                sessions.belongsTo(models.users, { as: 'user', foreignKey: 'user_id' });
-            }
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
+    class Sessions extends Model<SessionInterface> implements SessionInterface {
+        declare id: number;
+        declare user_id: number;
+        declare device_id: string;
+        declare access_token: string;
+        declare refresh_token: string;
+        declare createdAt: Date;
+        declare updatedAt: Date;
+
+        static associate(models) {
+            Sessions.belongsTo(models.users, { as: 'users', foreignKey: 'user_id' });
         }
-    
-    sessions.init(
+    }
+
+    Sessions.init(
         {
-            user_id: { type: DataTypes.INTEGER },
-            device_id: { type: DataTypes.STRING },
-            access_token: { type: DataTypes.STRING },
-            refresh_token: { type: DataTypes.STRING },
-            createdAt: { field: 'createdAt', type: DataTypes.DATE },
-            updatedAt: { field: 'updatedAt', type: DataTypes.DATE },
-            
+            id: { type: dataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+            user_id: { type: dataTypes.INTEGER },
+            device_id: { type: dataTypes.STRING },
+            access_token: { type: dataTypes.STRING },
+            refresh_token: { type: dataTypes.STRING },
+            createdAt: { field: 'createdAt', type: dataTypes.DATE },
+            updatedAt: { field: 'updatedAt', type: dataTypes.DATE },
         },
         {
             sequelize,
@@ -33,5 +34,5 @@ module.exports = (sequelize: Sequelize) => {
         }
     );
 
-    return sessions;
+    return Sessions;
 };

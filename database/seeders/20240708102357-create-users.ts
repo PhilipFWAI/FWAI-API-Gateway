@@ -6,6 +6,7 @@ const userOne = {
   username: 'Josue',
   email: 'josue@firstwaveai.com',
   password: hashPassword('Qwerty@123'),
+  is_verified: true,
   createdAt: new Date(),
   updatedAt: new Date(),
 };

@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
-import { SessionInterface } from '../models';
 import { verifyToken } from '../utils/jwtUtils';
 import responseUtils from '../utils/responseUtils';
+import { SessionInterface } from '../models/interfaces';
 import authRepository from '../modules/auth/repository/authRepository';
 import { ID, USER_ID,ACCESS_TOKEN, DEVICE_ID } from '../utils/variablesUtils';
 

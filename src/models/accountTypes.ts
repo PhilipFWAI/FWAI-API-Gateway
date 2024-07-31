@@ -1,22 +1,24 @@
-import { AccountTypesInterface } from './index';
+import { AccountTypesInterface } from './interfaces';
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
-module.exports = (sequelize: Sequelize) => {
-    class AccountTypes extends Model<AccountTypesInterface> 
-        implements AccountTypesInterface {
-            declare accountType: string;
-            declare createdAt: Date;
-            declare updatedAt: Date;
-            static associate (models) {
-                AccountTypes.hasOne(models.users, { as: 'user', foreignKey: 'accountType_id' });
-            }
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
+    class AccountTypes extends Model<AccountTypesInterface> implements AccountTypesInterface {
+        declare id: number;
+        declare accountType: string;
+        declare createdAt: Date;
+        declare updatedAt: Date;
+
+        static associate(models) {
+            AccountTypes.hasMany(models.users, { as: 'users', foreignKey: 'accountType_id' });
         }
-    
+    }
+
     AccountTypes.init(
         {
-            accountType: { type: DataTypes.STRING },
-            createdAt: { type: DataTypes.DATE, field: 'createdAt' },
-            updatedAt: { type: DataTypes.DATE, field: 'updatedAt' },
+            id: { type: dataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+            accountType: { type: dataTypes.STRING },
+            createdAt: { type: dataTypes.DATE },
+            updatedAt: { type: dataTypes.DATE },
         },
         {
             sequelize,

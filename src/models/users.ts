@@ -1,32 +1,33 @@
-import { UsersInterface } from './index';
+import { UsersInterface } from './interfaces';
 import { Sequelize, Model, DataTypes } from 'sequelize';
 
-module.exports = (sequelize: Sequelize) => {
-    class users extends Model<UsersInterface>
-        implements UsersInterface {
-            declare accountType_id: number;
-            declare username: string;
-            declare email: string
-            declare password: string;
-            declare isVerified: boolean;
-            declare createdAt: Date;
-            declare updatedAt: Date;
-            static associate (models) {
-                users.hasMany(models.sessions, { as: 'session', foreignKey: 'user_id' });
-                users.belongsTo(models.accountTypes, { as: 'accountType', foreignKey: 'accountType_id' });
-            }
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes) => {
+    class Users extends Model<UsersInterface> implements UsersInterface {
+        declare id: number;
+        declare accountType_id: number;
+        declare username: string;
+        declare email: string;
+        declare password: string;
+        declare is_verified: boolean;
+        declare createdAt: Date;
+        declare updatedAt: Date;
+
+        static associate(models) {
+            Users.belongsTo(models.accountTypes, { as: 'accountTypes', foreignKey: 'accountType_id' });
+            Users.hasMany(models.sessions, { as: 'sessions', foreignKey: 'user_id' });
         }
-    
-    users.init(
+    }
+
+    Users.init(
         {
-            accountType_id: { type: DataTypes.INTEGER },
-            username: { type: DataTypes.STRING },
-            email: { type: DataTypes.STRING },
-            password: { type: DataTypes.STRING },
-            isVerified: { type: DataTypes.BOOLEAN },
-            createdAt: { field: 'createdAt', type: DataTypes.DATE },
-            updatedAt: { field: 'updatedAt', type: DataTypes.DATE },
-            
+            id: { type: dataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+            accountType_id: { type: dataTypes.INTEGER },
+            username: { type: dataTypes.STRING },
+            email: { type: dataTypes.STRING },
+            password: { type: dataTypes.STRING },
+            is_verified: { type: dataTypes.BOOLEAN },
+            createdAt: { type: dataTypes.DATE },
+            updatedAt: { type: dataTypes.DATE },
         },
         {
             sequelize,
@@ -36,5 +37,5 @@ module.exports = (sequelize: Sequelize) => {
         }
     );
 
-    return users;
+    return Users;
 };
