@@ -69,6 +69,12 @@ This Gateway provides a single entry point for managing all inbound and outbound
 
 3. Get Spread Sheet Data
 
+4. Create Spread Sheet Data
+
+5. Update Spread Sheet Data
+
+6. Delete Spread Sheet Data
+
 ## INSTALLATION AND DB SETUP
 
 1. Clone the repository: ```git clone git@github.com:PhilipFWAI/FWAI-API-Gateway.git```

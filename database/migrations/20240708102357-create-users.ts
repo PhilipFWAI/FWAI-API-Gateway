@@ -10,4 +10,3 @@ module.exports = { async up(queryInterface: QueryInterface) { await queryInterfa
     createdAt: { allowNull: false, type: DataTypes.DATE },
     updatedAt: { allowNull: false, type: DataTypes.DATE },
 }); }, async down(queryInterface: QueryInterface) { await queryInterface.dropTable('users'); } };
-
