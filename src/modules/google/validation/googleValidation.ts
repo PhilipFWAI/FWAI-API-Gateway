@@ -164,7 +164,36 @@ const listSpreadSheetsSchema =  Joi.object({
   }),
 });
 
-const getSpreadSheetDataSchema =  Joi.object({
+const spreadSheetHeaderSchema = Joi.array().items(Joi.string().required()).min(1).required().messages({
+  'any.required': 'First array for headers is required ex: ["Name", "Email", "etc..."].',
+  'array.base': 'First array must be an array of headers.',
+  'array.min': 'First array of headers must contain at least one value ["Name"].',
+  'string.base': 'Each header item must be a string.',
+  'string.empty': 'First array for headers cannot be empty.'
+});
+
+const spreadSheetDataSchema = Joi.array().items(Joi.string().required()).min(1).required().messages({
+  'any.required': 'Next arrays for data values is required ex: ["Joe", "email@yahoo.com", "etc..."].',
+  'array.base': 'Next arrays must be an array of data values.',
+  'array.min': 'Next arrays of data values must contain at least one value ["Jose"].',
+  'string.empty': 'Next arrays for data values cannot be empty.'
+});
+    
+const createSpreadSheetDataSchema = Joi.object({
+  range: Joi.string().required().messages({
+    'any.required': 'range is required ex: Sheet1!A1:D10',
+    'string.base': 'range must be a string ex: Sheet1!A1:D10',
+    'string.empty': 'range is is not allowed to be empty ex: Sheet1!A1:D10',
+  }),
+  values: Joi.array().items(spreadSheetHeaderSchema, spreadSheetDataSchema).min(2).required().messages({
+    'array.base': 'The "values" must be an array of arrays.',
+    'array.min': 'The "values" array must contain at least two arrays.',
+    'any.required': 'The "values" field is required.',
+    'array.includesRequiredUnknowns': 'The values array must contain at least one header array ex: ["Name", "Email", "etc..."]. followed by at least one data values array ex: ["Joe", "email@yahoo.com", "etc..."].',
+  }),
+});
+
+const rangeSpreadSheetDataSchema =  Joi.object({
   range: Joi.string().required().messages({
     'any.required': 'range is required ex: Sheet1!A1:D10',
     'string.base': 'range must be a string ex: Sheet1!A1:D10',
@@ -172,4 +201,26 @@ const getSpreadSheetDataSchema =  Joi.object({
   }),
 });
 
-export { codeSchema, refreshAccessTokenSchema, createEventSchema, listEventsSchema, listSpreadSheetsSchema, getSpreadSheetDataSchema };
+const updateSpreadSheetDataSchema = Joi.object({
+  range: Joi.string().required().messages({
+    'any.required': 'range is required ex: Sheet1!A1:D10',
+    'string.base': 'range must be a string ex: Sheet1!A1:D10',
+    'string.empty': 'range is is not allowed to be empty ex: Sheet1!A1:D10',
+  }),
+  values: Joi.array().items().min(1).required().messages({
+    'any.required': 'values field is required.',
+    'array.base': 'values must be an array of arrays.',
+    'array.min': 'values array must contain at least 1 array.'
+  }),
+});
+
+export {
+  codeSchema,
+  refreshAccessTokenSchema,
+  createEventSchema,
+  listEventsSchema,
+  listSpreadSheetsSchema,
+  createSpreadSheetDataSchema,
+  rangeSpreadSheetDataSchema,
+  updateSpreadSheetDataSchema
+};

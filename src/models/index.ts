@@ -6,7 +6,7 @@ import { Sequelize, DataTypes, Model, ModelStatic } from 'sequelize';
 const db: Partial<DBInterface> = {};
 let sequelize: Sequelize;
 const basename = path.basename(__filename);
-const config = require('../configs/config') as DBConfigInterface;
+const config = require('../configs/sqlDatabase') as DBConfigInterface;
 
 if (config.url) {
     sequelize = new Sequelize(config.url, config);
