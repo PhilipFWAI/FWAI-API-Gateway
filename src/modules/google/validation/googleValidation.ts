@@ -158,9 +158,9 @@ const listSpreadSheetsSchema =  Joi.object({
     'string.empty': 'pageSize is is not allowed to be empty',
   }),
   nextPageToken: Joi.string().messages({
-    'any.required': 'nextPageToken is required and is event name',
-    'string.base': 'nextPageToken must be a string and is event name',
-    'date.empty': 'nextPageToken is not allowed to be empty and is event name',
+    'any.required': 'nextPageToken is required',
+    'string.base': 'nextPageToken must be a string',
+    'date.empty': 'nextPageToken is not allowed to be empty',
   }),
 });
 

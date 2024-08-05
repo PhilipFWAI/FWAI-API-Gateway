@@ -81,6 +81,20 @@ This Gateway provides a single entry point for managing all inbound and outbound
 
 2. Refresh Access Token
 
+3. Save Tokens In Database
+
+4. List Hubspot Contacts
+
+5. Get Hubspot Contact By Id
+
+6. Get Hubspot Contact By Email
+
+7. Create Hubspot Contact
+
+8. Update Hubspot Contact
+
+9. Delete Hubspot Contact
+
 ## INSTALLATION AND DB SETUP
 
 1. Clone the repository: ```git clone git@github.com:PhilipFWAI/FWAI-API-Gateway.git```

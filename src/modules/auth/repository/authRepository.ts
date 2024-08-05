@@ -1,6 +1,7 @@
 import models from '../../../models';
 import { hashPassword } from '../../../utils/passwordUtils';
-import { FindByAttributesInterface, FindByTripleAttributesInterface, SessionInterface, UpdateByAttributesInterface, UsersInterface } from '../../../models/interfaces';
+import { PLATFORM, USER_ID } from '../../../utils/variablesUtils';
+import { AuthManagementsInterface, FindByAttributesInterface, FindByTripleAttributesInterface, SessionInterface, UpdateByAttributesInterface, UsersInterface } from '../../../models/interfaces';
 
 const createUser = async (body: UsersInterface): Promise<UsersInterface> => {
     body.password = hashPassword(body.password);
@@ -32,4 +33,28 @@ const destroySessionByAttribute = async ({ primaryKey, primaryValue, secondaryKe
     await models.sessions.destroy({where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue }});
 };
 
-export default { createUser, findUserByAttributes, updateUserByAttributes, createSession, findSessionByAttributes, findSessionByTripleAttributes, destroySessionByAttribute };
+const findAuthPlatformByAttributes = async ({ primaryKey, primaryValue, secondaryKey, secondaryValue }: FindByAttributesInterface): Promise<AuthManagementsInterface | null> => {
+    return await models.authManagements.findOne({ where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue } });
+};
+
+const createAuthPlatform = async (body: AuthManagementsInterface): Promise<AuthManagementsInterface> => {
+    return await models.authManagements.create(body);
+};
+
+const updateAuthPlatform = async ({ user_id, platform, access_token, refresh_token }: AuthManagementsInterface): Promise<AuthManagementsInterface> => {
+    await models.authManagements.update({ access_token, refresh_token }, { where: { user_id, platform } });
+    return await findAuthPlatformByAttributes({ primaryKey: USER_ID, primaryValue:  user_id, secondaryKey: PLATFORM, secondaryValue: platform });
+};
+
+export default {
+    createUser,
+    findUserByAttributes,
+    updateUserByAttributes,
+    createSession,
+    findSessionByAttributes,
+    findSessionByTripleAttributes,
+    destroySessionByAttribute,
+    findAuthPlatformByAttributes,
+    createAuthPlatform,
+    updateAuthPlatform
+};
