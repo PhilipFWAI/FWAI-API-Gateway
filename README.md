@@ -75,6 +75,12 @@ This Gateway provides a single entry point for managing all inbound and outbound
 
 6. Delete Spread Sheet Data
 
+### HUBSPOT
+
+1. Get Access Token
+
+2. Refresh Access Token
+
 ## INSTALLATION AND DB SETUP
 
 1. Clone the repository: ```git clone git@github.com:PhilipFWAI/FWAI-API-Gateway.git```

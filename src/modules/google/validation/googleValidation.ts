@@ -11,7 +11,7 @@ const codeSchema = Joi.object({
     'string.base': 'scope must be a string',
     'string.empty': 'scope is is not allowed to be empty',
   }),
-});
+}).unknown(true);
 
 const refreshAccessTokenSchema = Joi.object({
   refreshToken: Joi.string().required().messages({

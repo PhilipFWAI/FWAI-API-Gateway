@@ -8,7 +8,7 @@ const router: Router = Router();
 
 router.get('/auth-code', googleController.googleAuth);
 router.get('/auth-redirect-url', isQueryValidation(codeSchema), googleController.googleAuthCallback);
-router.get('/refresh-access-token', isQueryValidation(refreshAccessTokenSchema), googleController.googleRefreshAccessToken);
+router.get('/auth-refresh-access-token', isQueryValidation(refreshAccessTokenSchema), googleController.googleRefreshAccessToken);
 
 router.get('/calendars', isHeaderValidation(authorizationSchema), googleController.googleListCalendars);
 router.get('/event/:eventId/:calendarId', isHeaderValidation(authorizationSchema), googleController.googleListEvent);
