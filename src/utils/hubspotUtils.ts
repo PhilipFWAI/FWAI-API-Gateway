@@ -1,4 +1,3 @@
-export const HUBSPOT_EVENTS = 'https://api.hubapi.com/events';
 export const HUBSPOT_ANALYTICS = 'https://api.hubapi.com/analytics';
 export const HUBSPOT_OWNERS = 'https://api.hubapi.com/crm/v3/owners';
 export const HUBSPOT_DEALS = 'https://api.hubapi.com/crm/v3/objects/deals';

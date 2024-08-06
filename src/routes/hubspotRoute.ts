@@ -5,7 +5,7 @@ import { gatewayAuthentication } from '../middlewares/authenticationMiddleware';
 import { authorizationSchema, authTokensSchema } from '../modules/auth/validation/authValidation';
 import { isAuthPlatformExist, isAuthPlatformTokenExist } from '../middlewares/authorizationMiddleware';
 import { isBodyValidation, isHeaderValidation, isQueryValidation } from '../middlewares/requestMiddleware';
-import { hubspotCreateContactSchema, hubspotUpdateContactSchema, hubspotListSchema, hubspotCreateDealsPipelineStagesSchema, hubspotUpdateDealsPipelineSchema, hubspotCreateDealsSchema, hubspotUpdateDealsSchema } from '../modules/hubspot/validation/hubspotValidation';
+import { hubspotCreateContactSchema, hubspotUpdateContactSchema, hubspotListSchema, hubspotCreateDealsPipelineStagesSchema, hubspotUpdateDealsPipelineSchema, hubspotCreateDealsSchema, hubspotUpdateDealsSchema, hubspotSearchContactsSchema } from '../modules/hubspot/validation/hubspotValidation';
 
 const router: Router = Router();
 
@@ -15,10 +15,11 @@ router.get('/auth-refresh-access-token', isHeaderValidation(authorizationSchema)
 router.post('/save-auth-tokens', isHeaderValidation(authorizationSchema), isBodyValidation(authTokensSchema), gatewayAuthentication, isAuthPlatformExist('hubspot'), hubspotController.HubspotSaveAuthTokens);
 
 router.delete('/contacts/:id', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotDeleteContact);
-router.get('/owners-by-emails/:email', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetOwnerByEmail);
-router.get('/contacts-by-emails/:email', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetContactByEmail);
+router.get('/contacts-by-ids/:id', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetContactsById);
+router.get('/owners-by-emails/:email', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetOwnersByEmail);
+router.get('/contacts-by-emails/:email', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetContactsByEmail);
+router.post('/search-contacts', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isBodyValidation(hubspotSearchContactsSchema), hubspotController.hubspotSearchContacts);
 
-router.get('/contacts-by-ids/:id', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetContactById);
 router.get('/contacts', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isQueryValidation(hubspotListSchema), hubspotController.hubspotListContacts);
 router.post('/contacts', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isBodyValidation(hubspotCreateContactSchema), hubspotController.hubspotCreateContact);
 router.patch('/contacts/:id', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isBodyValidation(hubspotUpdateContactSchema), hubspotController.hubspotUpdateContact);
@@ -33,6 +34,8 @@ router.get('/deals', isHeaderValidation(authorizationSchema), gatewayAuthenticat
 router.post('/deals', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isBodyValidation(hubspotCreateDealsSchema), hubspotController.hubspotCreateDeals);
 router.patch('/deals/:dealId', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isBodyValidation(hubspotUpdateDealsSchema), hubspotController.hubspotUpdateDeals);
 
+router.get('/analytics-views', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isQueryValidation(hubspotListSchema), hubspotController.hubspotListAnalyticsViews);
 router.get('/analytics-events', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isQueryValidation(hubspotListSchema), hubspotController.hubspotListAnalyticsEvents);
+router.get('/analytics-reports', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isQueryValidation(hubspotListSchema), hubspotController.hubspotListAnalyticsReports);
 
 export default router;
