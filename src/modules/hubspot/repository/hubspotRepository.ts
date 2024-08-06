@@ -20,5 +20,5 @@ const handleHubspotAuth = async (auth, user_id) => {
 };
 
 export default {
-    handleHubspotAuth
+    handleHubspotAuth,
 };
