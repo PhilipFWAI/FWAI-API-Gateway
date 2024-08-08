@@ -109,23 +109,20 @@ const isAccountTypeExist = async (req, res, next) => {
     }
 };
 
-const isAuthPlatformExist = (platform: string) => {
-    return async (req, res, next) => {
-        try {
-            const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: PLATFORM, secondaryValue: platform });
-            if(authPlatformExist) {
-                const data = await authRepository.updateAuthPlatform({ user_id: req.user.id, platform: platform, access_token: req.body.access_token, refresh_token: req.body.refresh_token });
-                responseUtils.handleSuccess(httpStatus.OK, 'Success.', { token: data });
-                return responseUtils.response(res);
-            }
-
-            req.body.platform = platform;
-            return next();
-        } catch (error) {    
-            responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
+const isAuthPlatformExist = async (req, res, next) => {
+    try {
+        const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: PLATFORM, secondaryValue: req.body.platform });
+        if(authPlatformExist) {
+            const data = await authRepository.updateAuthPlatform({ user_id: req.user.id, platform: req.body.platform, access_token: req.body.access_token, refresh_token: req.body.refresh_token });
+            responseUtils.handleSuccess(httpStatus.OK, 'Success.', { token: data });
             return responseUtils.response(res);
         }
-    };
+
+        return next();
+    } catch (error) {    
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
+    }
 };
 
 const isAuthPlatformTokenExist = (platform: string) => {

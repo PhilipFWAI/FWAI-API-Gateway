@@ -3,8 +3,7 @@ import httpStatus from 'http-status';
 import { URLSearchParams } from 'url';
 import responseUtils from '../../../utils/responseUtils';
 import hubspotRepository from '../repository/hubspotRepository';
-import authRepository from '../../auth/repository/authRepository';
-import { HUBSPOT_ANALYTICS, HUBSPOT_CONTACTS, HUBSPOT_DEALS, HUBSPOT_OWNERS, HUBSPOT_PIPELINES } from '../../../utils/hubspotUtils';
+import { HUBSPOT_ANALYTICS, HUBSPOT_AUTOMATION, HUBSPOT_COMPANIES, HUBSPOT_CONTACTS, HUBSPOT_CUSTOM_OBJECTS, HUBSPOT_DEALS, HUBSPOT_OWNERS, HUBSPOT_PIPELINES } from '../../../utils/hubspotUtils';
 
 const hubspotAuth = async (req, res) => {
     try {
@@ -44,17 +43,6 @@ const hubspotAuthRefreshAccessToken = async (req, res) => {
     try {
         const response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         responseUtils.handleSuccess(httpStatus.OK, 'Success.', { tokens: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const HubspotSaveAuthTokens = async (req, res) => {
-    try {
-        const data = await authRepository.createAuthPlatform({ user_id: req.user.id, platform: req.body.platform, access_token: req.body.access_token, refresh_token: req.body.refresh_token });
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { tokens: data });
         return responseUtils.response(res);
     } catch (error) {
         responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
@@ -127,7 +115,7 @@ const hubspotListContacts = async (req, res) => {
     }
 };
 
-const hubspotCreateContact = async (req, res) => {
+const hubspotCreateContacts = async (req, res) => {
     try {
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         response = await axios.post(HUBSPOT_CONTACTS, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
@@ -140,7 +128,7 @@ const hubspotCreateContact = async (req, res) => {
     }
 };
 
-const hubspotUpdateContact = async (req, res) => {
+const hubspotUpdateContacts = async (req, res) => {
     try {
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         response = await axios.patch(`${HUBSPOT_CONTACTS}/${req.params.id}`, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
@@ -153,7 +141,7 @@ const hubspotUpdateContact = async (req, res) => {
     }
 };
 
-const hubspotDeleteContact = async (req, res) => {
+const hubspotDeleteContacts = async (req, res) => {
     try {
         const response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         await axios.delete(`${HUBSPOT_CONTACTS}/${req.params.id}`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
@@ -166,7 +154,111 @@ const hubspotDeleteContact = async (req, res) => {
     }
 };
 
-const hubspotListDealsPipelines = async (req, res) => {
+const hubspotListCompanies = async (req, res) => {
+    try {
+        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+        response = await axios.get(HUBSPOT_COMPANIES, { params: req.query, headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { companies: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotCreateCompanies = async (req, res) => {
+    try {
+        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+        response = await axios.post(HUBSPOT_COMPANIES, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { company: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotUpdateCompanies = async (req, res) => {
+    try {
+        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+        response = await axios.patch(`${HUBSPOT_COMPANIES}/${req.params.id}`, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { company: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotDeleteCompanies = async (req, res) => {
+    try {
+        const response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+        await axios.delete(`${HUBSPOT_COMPANIES}/${req.params.id}`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', {});
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotListCustomObjects = async (req, res) => {
+    try {
+        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+        response = await axios.get(HUBSPOT_CUSTOM_OBJECTS, { params: req.query, headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { customObjects: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotCreateCustomObjects = async (req, res) => {
+    try {
+        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+        response = await axios.post(HUBSPOT_CUSTOM_OBJECTS, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { customObject: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotUpdateCustomObjects = async (req, res) => {
+    try {
+        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+        response = await axios.patch(HUBSPOT_CUSTOM_OBJECTS, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { customObject: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotDeleteCustomObjects = async (req, res) => {
+    try {
+        const response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+        await axios.delete(`${HUBSPOT_CUSTOM_OBJECTS}/${req.params.id}`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', {});
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotListPipelines = async (req, res) => {
     try {
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         response = await axios.get(`${HUBSPOT_PIPELINES}/deals`, { params: req.query, headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
@@ -179,7 +271,7 @@ const hubspotListDealsPipelines = async (req, res) => {
     }
 };
 
-const hubspotGetDealsPipelineStages = async (req, res) => {
+const hubspotGetPipeline = async (req, res) => {
     try {
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         response = await axios.get(`${HUBSPOT_PIPELINES}/deals/${req.params.pipelineId}/stages`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
@@ -192,7 +284,7 @@ const hubspotGetDealsPipelineStages = async (req, res) => {
     }
 };
 
-const hubspotCreateDealsPipelineStages = async (req, res) => {
+const hubspotCreatePipelines = async (req, res) => {
     try {
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         response = await axios.post(`${HUBSPOT_PIPELINES}/deals`, req.body, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
@@ -205,7 +297,7 @@ const hubspotCreateDealsPipelineStages = async (req, res) => {
     }
 };
 
-const hubspotDeleteDealsPipelineStages = async (req, res) => {
+const hubspotDeletePipelines = async (req, res) => {
     try {
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         response = await axios.delete(`${HUBSPOT_PIPELINES}/deals/${req.params.pipelineId}`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
@@ -218,7 +310,7 @@ const hubspotDeleteDealsPipelineStages = async (req, res) => {
     }
 };
 
-const hubspotUpdateDealsPipelineStages = async (req, res) => {
+const hubspotUpdatePipelines = async (req, res) => {
     try {
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
         response = await axios.patch(`${HUBSPOT_PIPELINES}/deals/${req.params.pipelineId}`, req.body, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
@@ -311,28 +403,56 @@ const hubspotListAnalyticsViews = async (req, res) => {
     }
 };
 
+const hubspotWebhook = async (req, res) => {
+    try {
+        const isValidSignature  = await hubspotRepository.verifyHubspotSignature(req, process.env.HUBSPOT_CLIENT_SECRET);
+        if (!isValidSignature ) {            
+            responseUtils.handleError(httpStatus.FORBIDDEN, 'Forbidden: Invalid signature');
+            return responseUtils.response(res);
+        }
+
+        // socket.io functionalities to emit triggered events
+        console.log(isValidSignature, 'Implement Logic To Emit Triggered Events With Socket.io');
+        console.log(req.body);
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', {});
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
 export default {
     hubspotAuth,
     hubspotAuthCallback,
     hubspotAuthRefreshAccessToken,
-    HubspotSaveAuthTokens,
     hubspotListContacts,
-    hubspotCreateContact,
-    hubspotUpdateContact,
+    hubspotCreateContacts,
+    hubspotUpdateContacts,
     hubspotGetOwnersByEmail,
     hubspotGetContactsByEmail,
     hubspotGetContactsById,
     hubspotSearchContacts,
-    hubspotDeleteContact,
-    hubspotListDealsPipelines,
-    hubspotGetDealsPipelineStages,
-    hubspotCreateDealsPipelineStages,
-    hubspotDeleteDealsPipelineStages,
-    hubspotUpdateDealsPipelineStages,
+    hubspotDeleteContacts,
+    hubspotListCompanies,
+    hubspotCreateCompanies,
+    hubspotUpdateCompanies,
+    hubspotDeleteCompanies,
+    hubspotListPipelines,
+    hubspotGetPipeline,
+    hubspotCreatePipelines,
+    hubspotDeletePipelines,
+    hubspotUpdatePipelines,
     hubspotCreateDeals,
     hubspotUpdateDeals,
     hubspotListDeals,
     hubspotListAnalyticsReports,
     hubspotListAnalyticsEvents,
     hubspotListAnalyticsViews,
+    hubspotWebhook,
+    hubspotListCustomObjects,
+    hubspotCreateCustomObjects,
+    hubspotUpdateCustomObjects,
+    hubspotDeleteCustomObjects
 };

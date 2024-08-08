@@ -63,6 +63,11 @@ const accessTokenSchema = Joi.object({
 });
 
 const authTokensSchema =  Joi.object({
+  platform: Joi.string().valid('hubspot', 'google', 'zapier', 'stripe').required().messages({
+    'any.required': 'platform is required',
+    'string.base': 'platform must be a string',
+    'string.empty': 'platform is is not allowed to be empty',
+  }),
     access_token: Joi.string().required().messages({
       'any.required': 'access_token is required',
       'string.base': 'access_token must be a string',
