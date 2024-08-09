@@ -85,4 +85,21 @@ const signout = async (req, res) => {
   }
 };
 
-export default { signup, verifyEmail, signin, signout };
+const HubspotSaveAuthTokens = async (req, res) => {
+  try {
+      const data = await authRepository.createAuthPlatform({ user_id: req.user.id, platform: req.body.platform, access_token: req.body.access_token, refresh_token: req.body.refresh_token });
+      responseUtils.handleSuccess(httpStatus.OK, 'Success.', { tokens: data });
+      return responseUtils.response(res);
+  } catch (error) {
+      responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+      return responseUtils.response(res);
+  }
+};
+
+export default {
+  signup,
+  verifyEmail,
+  signin,
+  signout, 
+  HubspotSaveAuthTokens
+};

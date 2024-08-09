@@ -45,6 +45,16 @@ export interface AccountTypesInterface {
     updatedAt?: Date;
 }
 
+export interface AuthManagementsInterface {
+    id?: number;
+    user_id?: number,
+    platform?: string,
+    access_token?: string,
+    refresh_token?: string,
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
 export interface FindByAttributesInterface {
     primaryKey: string;
     primaryValue: number | string | boolean;
