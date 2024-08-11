@@ -6,7 +6,6 @@ import authRepository from '../modules/auth/repository/authRepository';
 import accountRepository from '../modules/account/repository/accountRepository';
 import { ACCESS_TOKEN, ACCOUNT_TYPE, DEVICE_ID, EMAIL, ID, PLATFORM, USER_ID } from '../utils/variablesUtils';
 
-
 const isUserExist = async (req, res, next) => {
     try {
         const userExist = await authRepository.findUserByAttributes({ primaryKey: EMAIL, primaryValue: req.body.email });
@@ -111,7 +110,7 @@ const isAccountTypeExist = async (req, res, next) => {
 
 const isAuthPlatformExist = async (req, res, next) => {
     try {
-        const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: PLATFORM, secondaryValue: req.body.platform });
+        const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ [USER_ID]: req.user.id, [PLATFORM]: req.body.platform });
         if(authPlatformExist) {
             const data = await authRepository.updateAuthPlatform({ user_id: req.user.id, platform: req.body.platform, access_token: req.body.access_token, refresh_token: req.body.refresh_token });
             responseUtils.handleSuccess(httpStatus.OK, 'Success.', { token: data });
@@ -128,7 +127,7 @@ const isAuthPlatformExist = async (req, res, next) => {
 const isAuthPlatformTokenExist = (platform: string) => {
     return async (req, res, next) => {
         try {
-            const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ primaryKey: USER_ID, primaryValue: req.user.id, secondaryKey: PLATFORM, secondaryValue: platform });
+            const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ [USER_ID]: req.user.id, [PLATFORM]: platform });
             if (!authPlatformExist) {
                 responseUtils.handleError(httpStatus.NOT_FOUND, 'Account auth tokens didn`t saved and not found');
                 return responseUtils.response(res);

@@ -1,6 +1,6 @@
-import axios from 'axios';
 import crypto from 'crypto';
 import { URLSearchParams } from 'url';
+import { axiosUtil } from '../../../utils/axiosUtils';
 import authRepository from '../../auth/repository/authRepository';
 import { PLATFORM, USER_ID } from '../../../utils/variablesUtils';
 
@@ -12,8 +12,8 @@ const handleHubspotAuth = async (auth, user_id) => {
         redirect_uri: process.env.HUBSPOT_AUTH_REDIRECT_URL,
     });
 
-    const response = await axios.post('https://api.hubapi.com/oauth/v1/token', data, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }});
-    const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ primaryKey: USER_ID, primaryValue: user_id, secondaryKey: PLATFORM, secondaryValue: 'hubspot' });
+    const response = await axiosUtil('/oauth/v1/token', 'POST', data);
+    const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ [USER_ID]: user_id, [PLATFORM]: 'hubspot' });
     if(authPlatformExist) await authRepository.updateAuthPlatform({ user_id, platform: 'hubspot', access_token: response.data.access_token, refresh_token: response.data.refresh_token });
     if(!authPlatformExist) await authRepository.createAuthPlatform({ user_id, platform: 'hubspot', access_token: response.data.access_token, refresh_token: response.data.refresh_token });
 

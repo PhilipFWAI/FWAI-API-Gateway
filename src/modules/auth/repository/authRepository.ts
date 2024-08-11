@@ -1,7 +1,7 @@
 import models from '../../../models';
 import { hashPassword } from '../../../utils/passwordUtils';
 import { PLATFORM, USER_ID } from '../../../utils/variablesUtils';
-import { AuthManagementsInterface, FindByAttributesInterface, FindByTripleAttributesInterface, SessionInterface, UpdateByAttributesInterface, UsersInterface } from '../../../models/interfaces';
+import { AuthManagementsInterface, FindAuthPlatformByAttributesInterface, FindByAttributesInterface, FindByTripleAttributesInterface, SessionInterface, UpdateByAttributesInterface, UsersInterface } from '../../../models/interfaces';
 
 const createUser = async (body: UsersInterface): Promise<UsersInterface> => {
     body.password = hashPassword(body.password);
@@ -33,8 +33,8 @@ const destroySessionByAttribute = async ({ primaryKey, primaryValue, secondaryKe
     await models.sessions.destroy({where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue }});
 };
 
-const findAuthPlatformByAttributes = async ({ primaryKey, primaryValue, secondaryKey, secondaryValue }: FindByAttributesInterface): Promise<AuthManagementsInterface | null> => {
-    return await models.authManagements.findOne({ where: { [primaryKey]: primaryValue, [secondaryKey]: secondaryValue } });
+const findAuthPlatformByAttributes = async (attributes: FindAuthPlatformByAttributesInterface): Promise<AuthManagementsInterface | null> => {
+    return await models.authManagements.findOne({ where: attributes });
 };
 
 const createAuthPlatform = async (body: AuthManagementsInterface): Promise<AuthManagementsInterface> => {
@@ -43,7 +43,7 @@ const createAuthPlatform = async (body: AuthManagementsInterface): Promise<AuthM
 
 const updateAuthPlatform = async ({ user_id, platform, access_token, refresh_token }: AuthManagementsInterface): Promise<AuthManagementsInterface> => {
     await models.authManagements.update({ access_token, refresh_token }, { where: { user_id, platform } });
-    return await findAuthPlatformByAttributes({ primaryKey: USER_ID, primaryValue:  user_id, secondaryKey: PLATFORM, secondaryValue: platform });
+    return await findAuthPlatformByAttributes({ [USER_ID]: user_id, [PLATFORM]: platform });
 };
 
 export default {

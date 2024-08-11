@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import { URLSearchParams } from 'url';
 import responseUtils from '../../../utils/responseUtils';
 import hubspotRepository from '../repository/hubspotRepository';
-import { HUBSPOT_ANALYTICS, HUBSPOT_AUTOMATION, HUBSPOT_COMPANIES, HUBSPOT_CONTACTS, HUBSPOT_CUSTOM_OBJECTS, HUBSPOT_DEALS, HUBSPOT_OWNERS, HUBSPOT_PIPELINES } from '../../../utils/hubspotUtils';
+import { HUBSPOT_ANALYTICS, HUBSPOT_COMPANIES, HUBSPOT_CONTACTS, HUBSPOT_CUSTOM_OBJECTS, HUBSPOT_DEALS, HUBSPOT_OWNERS, HUBSPOT_PIPELINES } from '../../../utils/hubspotUtils';
 
 const hubspotAuth = async (req, res) => {
     try {
@@ -45,6 +45,7 @@ const hubspotAuthRefreshAccessToken = async (req, res) => {
         responseUtils.handleSuccess(httpStatus.OK, 'Success.', { tokens: response.data });
         return responseUtils.response(res);
     } catch (error) {
+        console.log('======>', error);
         responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
         return responseUtils.response(res);
     }
@@ -411,8 +412,8 @@ const hubspotWebhook = async (req, res) => {
             return responseUtils.response(res);
         }
 
-        // socket.io functionalities to emit triggered events
-        console.log(isValidSignature, 'Implement Logic To Emit Triggered Events With Socket.io');
+        // Functionalities to send notification with triggered events
+        console.log(isValidSignature, 'Implement Logic To Send Notification With Triggered Events');
         console.log(req.body);
 
         responseUtils.handleSuccess(httpStatus.OK, 'Success.', {});
