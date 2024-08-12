@@ -64,37 +64,19 @@ const hubspotGetOwnersByEmail = async (req, res) => {
     }
 };
 
-const hubspotGetContactsByEmail = async (req, res) => {
+const hubspotGetContactsByAttribute = async (req, res) => {
     try {
+        const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+        const isEmailAddress: boolean = emailRegex.test(req.params?.attribute);
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.get(`${HUBSPOT_CONTACTS}/${req.params.email}?idProperty=email`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
 
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contact: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
+        if (isEmailAddress) {
+            response = await axios.get(`${HUBSPOT_CONTACTS}/${req.params.attribute}?idProperty=email`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
+            responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contact: response.data });
+            return responseUtils.response(res);
+        }
 
-const hubspotGetContactsById = async (req, res) => {
-    try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.get(`${HUBSPOT_CONTACTS}/${req.params.id}`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
-
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contact: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotSearchContacts = async (req, res) => {
-    try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.post(`${HUBSPOT_CONTACTS}/search`, req.body, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
-
+        response = await axios.get(`${HUBSPOT_CONTACTS}/${req.params.attribute}`, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
         responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contact: response.data });
         return responseUtils.response(res);
     } catch (error) {
@@ -106,8 +88,14 @@ const hubspotSearchContacts = async (req, res) => {
 const hubspotListContacts = async (req, res) => {
     try {
         let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.get(HUBSPOT_CONTACTS, { params: req.query, headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
+        
+        if (req.body.filterGroups) {
+            response = await axios.post(`${HUBSPOT_CONTACTS}/search`, req.body, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
+            responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contacts: response.data });
+            return responseUtils.response(res);
+        }
 
+        response = await axios.get(HUBSPOT_CONTACTS, { params: req.query, headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
         responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contacts: response.data });
         return responseUtils.response(res);
     } catch (error) {
@@ -432,9 +420,7 @@ export default {
     hubspotCreateContacts,
     hubspotUpdateContacts,
     hubspotGetOwnersByEmail,
-    hubspotGetContactsByEmail,
-    hubspotGetContactsById,
-    hubspotSearchContacts,
+    hubspotGetContactsByAttribute,
     hubspotDeleteContacts,
     hubspotListCompanies,
     hubspotCreateCompanies,

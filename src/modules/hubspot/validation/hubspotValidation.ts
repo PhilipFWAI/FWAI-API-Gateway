@@ -293,24 +293,24 @@ const hubspotUpdateDealsSchema =  Joi.object({
 
 const hubspotSearchContactsSchema = Joi.object({
   filterGroups: Joi.array().items(
-      Joi.object({
-          filters: Joi.array().items(
-              Joi.object({
-                  propertyName: Joi.string().messages({
-                    'any.required': 'propertyName is required',
-                    'string.base': 'propertyName must be a string',
-                    'string.empty': 'propertyName is not allowed to be empty',
-                  }),
-                  value: Joi.string().messages({
-                    'any.required': 'value is required',
-                    'string.base': 'value must be a string',
-                    'string.empty': 'value is not allowed to be empty',
-                  }),
-                  operator: Joi.string().valid('LT', 'LTE', 'GT', 'GTE', 'EQ', 'NEQ', 'BETWEEN', 'IN', 'NOT_IN', 'HAS_PROPERTY', 'NOT_HAS_PROPERTY', 'CONTAINS_TOKEN', 'NOT_CONTAINS_TOKEN').required(),
-              }).required()
-          ).required()
-      }).required()
-  ).required()
+    Joi.object({
+        filters: Joi.array().items(
+            Joi.object({
+                propertyName: Joi.string().messages({
+                  'any.required': 'propertyName is required',
+                  'string.base': 'propertyName must be a string',
+                  'string.empty': 'propertyName is not allowed to be empty',
+                }),
+                value: Joi.string().messages({
+                  'any.required': 'value is required',
+                  'string.base': 'value must be a string',
+                  'string.empty': 'value is not allowed to be empty',
+                }),
+                operator: Joi.string().valid('LT', 'LTE', 'GT', 'GTE', 'EQ', 'NEQ', 'BETWEEN', 'IN', 'NOT_IN', 'HAS_PROPERTY', 'NOT_HAS_PROPERTY', 'CONTAINS_TOKEN', 'NOT_CONTAINS_TOKEN').required(),
+            }).required()
+        ).required()
+    }).required()
+  )
 });
 
 const hubspotCreateCompanySchema =  Joi.object({

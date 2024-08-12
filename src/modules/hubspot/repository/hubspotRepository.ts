@@ -14,8 +14,20 @@ const handleHubspotAuth = async (auth, user_id) => {
 
     const response = await axiosUtil('/oauth/v1/token', 'POST', data);
     const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ [USER_ID]: user_id, [PLATFORM]: 'hubspot' });
-    if(authPlatformExist) await authRepository.updateAuthPlatform({ user_id, platform: 'hubspot', access_token: response.data.access_token, refresh_token: response.data.refresh_token });
-    if(!authPlatformExist) await authRepository.createAuthPlatform({ user_id, platform: 'hubspot', access_token: response.data.access_token, refresh_token: response.data.refresh_token });
+    if (authPlatformExist) 
+        await authRepository.updateAuthPlatform({
+            user_id,
+            platform: 'hubspot',
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token
+        });
+    else 
+        await authRepository.createAuthPlatform({
+            user_id,
+            platform: 'hubspot',
+            access_token: response.data.access_token,
+            refresh_token: response.data.refresh_token
+        });
 
     return response;
 };

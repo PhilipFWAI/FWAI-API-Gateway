@@ -12,17 +12,14 @@ const router: Router = Router();
 router.get('/authorize', hubspotController.hubspotAuth);
 router.post('/webhook',  hubspotController.hubspotWebhook);
 router.get('/auth-redirect-url',  isQueryValidation(codeSchema), hubspotController.hubspotAuthCallback);
+router.get('/owners-by-emails/:email', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetOwnersByEmail);
 router.get('/auth-refresh-access-token', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotAuthRefreshAccessToken);
 
-router.get('/contacts-by-ids/:id', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetContactsById);
-router.get('/owners-by-emails/:email', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetOwnersByEmail);
-router.get('/contacts-by-emails/:email', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetContactsByEmail);
-router.post('/search-contacts', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isBodyValidation(hubspotSearchContactsSchema), hubspotController.hubspotSearchContacts);
-
 router.delete('/contacts/:id', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotDeleteContacts);
-router.get('/contacts', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isQueryValidation(hubspotListSchema), hubspotController.hubspotListContacts);
+router.get('/contacts/:attribute', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetContactsByAttribute);
 router.post('/contacts', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isBodyValidation(hubspotCreateContactSchema), hubspotController.hubspotCreateContacts);
 router.patch('/contacts/:id', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isBodyValidation(hubspotUpdateContactSchema), hubspotController.hubspotUpdateContacts);
+router.get('/contacts', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), isQueryValidation(hubspotListSchema), isBodyValidation(hubspotSearchContactsSchema), hubspotController.hubspotListContacts);
 
 router.get('/pipelines/:pipelineId', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotGetPipeline);
 router.delete('/pipelines/:pipelineId', isHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotDeletePipelines);
