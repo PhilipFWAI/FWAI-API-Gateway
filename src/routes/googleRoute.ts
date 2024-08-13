@@ -8,7 +8,7 @@ import { codeSchema, createEventSchema, createSpreadSheetDataSchema, rangeSpread
 
 const router: Router = Router();
 
-router.get('/auth-code', googleController.googleAuth);
+router.get('/authorize', googleController.googleAuth);
 router.get('/auth-redirect-url', routeQueryValidation(codeSchema), googleController.googleAuthCallback);
 router.get('/auth-refresh-access-token', routeHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('google'), googleController.googleRefreshAccessToken);
 
