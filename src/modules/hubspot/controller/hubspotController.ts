@@ -47,7 +47,6 @@ const hubspotAuthRefreshAccessToken = async (req, res) => {
         responseUtils.handleSuccess(httpStatus.OK, 'Success.', { tokens: response.data });
         return responseUtils.response(res);
     } catch (error) {
-        console.log('======>', error);
         responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
         return responseUtils.response(res);
     }

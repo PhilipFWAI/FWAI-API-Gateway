@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import googleController from '../modules/google/controller/googleController';
 import { authorizationSchema } from '../modules/auth/validation/authValidation';
+import { gatewayAuthentication } from '../middlewares/authenticationMiddleware';
+import { isAuthPlatformTokenExist } from '../middlewares/authorizationMiddleware';
 import { routeBodyValidation, routeHeaderValidation, routeQueryValidation } from '../middlewares/requestMiddleware';
-import { codeSchema, createEventSchema, createSpreadSheetDataSchema, rangeSpreadSheetDataSchema, listEventsSchema, listSpreadSheetsSchema, refreshAccessTokenSchema, updateSpreadSheetDataSchema } from '../modules/google/validation/googleValidation';
+import { codeSchema, createEventSchema, createSpreadSheetDataSchema, rangeSpreadSheetDataSchema, listEventsSchema, listSpreadSheetsSchema, updateSpreadSheetDataSchema } from '../modules/google/validation/googleValidation';
 
 const router: Router = Router();
 
 router.get('/auth-code', googleController.googleAuth);
 router.get('/auth-redirect-url', routeQueryValidation(codeSchema), googleController.googleAuthCallback);
-router.get('/auth-refresh-access-token', routeQueryValidation(refreshAccessTokenSchema), googleController.googleRefreshAccessToken);
+router.get('/auth-refresh-access-token', routeHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('google'), googleController.googleRefreshAccessToken);
 
 router.get('/calendars', routeHeaderValidation(authorizationSchema), googleController.googleListCalendars);
 router.get('/event/:eventId/:calendarId', routeHeaderValidation(authorizationSchema), googleController.googleListEvent);
