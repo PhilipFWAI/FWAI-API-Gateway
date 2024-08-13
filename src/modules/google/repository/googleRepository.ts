@@ -12,15 +12,15 @@ const handleGoogleAuth = async (googleOauth2Client, user_id) => {
         await authRepository.updateAuthPlatform({
             user_id,
             platform: 'google',
-            access_token: response.data.access_token,
-            refresh_token: response.data.refresh_token
+            access_token: response.res.data.access_token,
+            refresh_token: response.res.data.refresh_token
         });
     else 
         await authRepository.createAuthPlatform({
             user_id,
             platform: 'google',
-            access_token: response.data.access_token,
-            refresh_token: response.data.refresh_token
+            access_token: response.res.data.access_token,
+            refresh_token: response.res.data.refresh_token
         });
 
     return response;
