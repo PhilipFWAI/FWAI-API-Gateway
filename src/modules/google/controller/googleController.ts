@@ -31,10 +31,11 @@ const googleAuthCallback = async (req, res) => {
 
 const googleRefreshAccessToken = async (req, res) => {
     try {
-        googleOauth2Client.setCredentials({ refresh_token: req.query.refreshToken });
-        const response = await googleOauth2Client.refreshAccessToken();
+        googleOauth2Client.setCredentials({ refresh_token: req.authPlatform.refresh_token });
+        const response = await googleRepository.handleGoogleAuth(googleOauth2Client, req.user.id);
         googleOauth2Client.setCredentials(response.res.data);
         
+
         responseUtils.handleSuccess(httpStatus.OK, 'Success.',  { tokens: response.res.data });
         return responseUtils.response(res);
     } catch (error) {
