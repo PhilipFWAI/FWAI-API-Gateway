@@ -1,5 +1,30 @@
 import { OAuth2Client } from 'google-auth-library';
+import { PLATFORM, USER_ID } from '../../../utils/variablesUtils';
+import authRepository from '../../auth/repository/authRepository';
 import { google, calendar_v3, drive_v3, sheets_v4  } from 'googleapis';
+
+
+const handleGoogleAuth = async (googleOauth2Client, user_id) => {
+    const response = await googleOauth2Client.refreshAccessToken();
+    const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ [USER_ID]: user_id, [PLATFORM]: 'google' });
+
+    if (authPlatformExist) 
+        await authRepository.updateAuthPlatform({
+            user_id,
+            platform: 'google',
+            access_token: response.res.data.access_token,
+            refresh_token: response.res.data.refresh_token
+        });
+    else 
+        await authRepository.createAuthPlatform({
+            user_id,
+            platform: 'google',
+            access_token: response.res.data.access_token,
+            refresh_token: response.res.data.refresh_token
+        });
+
+    return response;
+};
 
 const googleListCalendars = async (googleOauth2Client: OAuth2Client): Promise<calendar_v3.Schema$CalendarList>  => {
     const googleCalendar = await google.calendar({ version: 'v3', auth: googleOauth2Client });
@@ -87,6 +112,7 @@ const googleClearSpreadSheetData = async (googleOauth2Client: OAuth2Client, spre
 
 
 export default {
+    handleGoogleAuth,
     googleListCalendars,
     googleCreateEvent,
     googleListEvents,

@@ -129,7 +129,7 @@ const isAuthPlatformTokenExist = (platform: string) => {
         try {
             const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ [USER_ID]: req.user.id, [PLATFORM]: platform });
             if (!authPlatformExist) {
-                responseUtils.handleError(httpStatus.NOT_FOUND, 'Account auth tokens didn`t saved and not found');
+                responseUtils.handleError(httpStatus.NOT_FOUND, `${platform.charAt(0).toUpperCase()}${platform.slice(1)} account platform tokens didn't saved before and not found`);
                 return responseUtils.response(res);
             }
 

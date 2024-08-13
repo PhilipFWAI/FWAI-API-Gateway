@@ -13,14 +13,6 @@ const codeSchema = Joi.object({
   }),
 }).unknown(true);
 
-const refreshAccessTokenSchema = Joi.object({
-  refreshToken: Joi.string().required().messages({
-    'any.required': 'refreshToken is required',
-    'string.base': 'refreshToken must be a string',
-    'string.empty': 'refreshToken is not allowed to be empty',
-  })
-});
-
 const createEventSchema = Joi.object({
   calendarId: Joi.string().messages({
     'any.required': 'calendarId is required',
@@ -216,7 +208,6 @@ const updateSpreadSheetDataSchema = Joi.object({
 
 export {
   codeSchema,
-  refreshAccessTokenSchema,
   createEventSchema,
   listEventsSchema,
   listSpreadSheetsSchema,
