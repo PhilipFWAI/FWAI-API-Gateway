@@ -2,7 +2,7 @@ import Joi from 'joi';
 import httpStatus from 'http-status';
 import responseUtils from '../utils/responseUtils';
 
-const isHeaderValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
+const routeHeaderValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
     try {
         const { error } = schema.validate(req.headers, { abortEarly: false });
         if (error) {
@@ -18,7 +18,7 @@ const isHeaderValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async
     }
 };
 
-const isQueryValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
+const routeQueryValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
   try {
     const { error } = schema.validate(req.query, { abortEarly: false });
     if (error) {
@@ -34,7 +34,7 @@ const isQueryValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async 
     }
 };
 
-const isBodyValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
+const routeBodyValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (req, res, next) => {
     try {
       const { error } = schema.validate(req.body, { abortEarly: false });
       if (error) {
@@ -50,4 +50,4 @@ const isBodyValidation = (schema: Joi.ObjectSchema | Joi.ArraySchema) => async (
     }
 };
 
-export { isHeaderValidation, isQueryValidation, isBodyValidation };
+export { routeHeaderValidation, routeQueryValidation, routeBodyValidation };

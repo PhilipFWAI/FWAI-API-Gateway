@@ -4,6 +4,8 @@ import { URLSearchParams } from 'url';
 import responseUtils from '../../../utils/responseUtils';
 import hubspotRepository from '../repository/hubspotRepository';
 import { HUBSPOT_ANALYTICS, HUBSPOT_COMPANIES, HUBSPOT_CONTACTS, HUBSPOT_CUSTOM_OBJECTS, HUBSPOT_DEALS, HUBSPOT_OWNERS, HUBSPOT_PIPELINES } from '../../../utils/hubspotUtils';
+import { hubspotCreateCompanySchema, hubspotCreateContactSchema, hubspotCreateCustomObjectsSchema, hubspotCreateDealsSchema, hubspotCreatePipelineSchema, hubspotUpdateCompanySchema, hubspotUpdateContactSchema, hubspotUpdateCustomObjectsSchema, hubspotUpdatePipelineSchema, hubspotUpdateDealsSchema } from '../validation/hubspotValidation';
+
 
 const hubspotAuth = async (req, res) => {
     try {
@@ -46,6 +48,26 @@ const hubspotAuthRefreshAccessToken = async (req, res) => {
         return responseUtils.response(res);
     } catch (error) {
         console.log('======>', error);
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotWebhook = async (req, res) => {
+    try {
+        const isValidSignature  = await hubspotRepository.verifyHubspotSignature(req, process.env.HUBSPOT_CLIENT_SECRET);
+        if (!isValidSignature ) {            
+            responseUtils.handleError(httpStatus.FORBIDDEN, 'Forbidden: Invalid signature');
+            return responseUtils.response(res);
+        }
+
+        // Functionalities to send notification with triggered events
+        console.log(isValidSignature, 'Implement Logic To Send Notification With Triggered Events');
+        console.log(req.body);
+
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', {});
+        return responseUtils.response(res);
+    } catch (error) {
         responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
         return responseUtils.response(res);
     }
@@ -195,11 +217,9 @@ const hubspotListAnalyticsViews = async (req, res, auth) => {
     }
 };
 
-const hubspotCreateCustomObjects = async (req, res) => {
+const hubspotCreateCustomObjects = async (req, res, auth) => {
     try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.post(HUBSPOT_CUSTOM_OBJECTS, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
-
+        const response = await axios.post(HUBSPOT_CUSTOM_OBJECTS, { properties: req.body}, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' }});
         responseUtils.handleSuccess(httpStatus.OK, 'Success.', { customObject: response.data });
         return responseUtils.response(res);
     } catch (error) {
@@ -208,12 +228,100 @@ const hubspotCreateCustomObjects = async (req, res) => {
     }
 };
 
-const hubspotUpdateCustomObjects = async (req, res) => {
+const hubspotCreateContacts = async (req, res, auth) => {
     try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.patch(HUBSPOT_CUSTOM_OBJECTS, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
+        const response = await axios.post(HUBSPOT_CONTACTS, { properties: req.body}, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' }});
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contact: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
 
+const hubspotCreateCompanies = async (req, res, auth) => {
+    try {
+        const response = await axios.post(HUBSPOT_COMPANIES, { properties: req.body}, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' }});
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { company: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotCreatePipelines = async (req, res, auth) => {
+    try {
+       const response = await axios.post(`${HUBSPOT_PIPELINES}/deals`, req.body, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' } });
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { pipelinesStages: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotCreateDeals = async (req, res, auth) => {
+    try {
+        req.body.closedate = new Date(req.body.closedate).toISOString();
+        const response = await axios.post(`${HUBSPOT_DEALS}`, { properties: req.body }, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' } });
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { deal: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotUpdateCustomObjects = async (req, res, auth) => {
+    try {
+        const response = await axios.patch(`${HUBSPOT_CUSTOM_OBJECTS}/${req.params.id}`, { properties: req.body}, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' }});
         responseUtils.handleSuccess(httpStatus.OK, 'Success.', { customObject: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotUpdateContacts = async (req, res, auth) => {
+    try {
+        const response = await axios.patch(`${HUBSPOT_CONTACTS}/${req.params.id}`, { properties: req.body}, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' }});
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contact: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotUpdateCompanies = async (req, res, auth) => {
+    try {
+        const response = await axios.patch(`${HUBSPOT_COMPANIES}/${req.params.id}`, { properties: req.body}, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' }});
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { company: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotUpdatePipelines = async (req, res, auth) => {
+    try {
+        const response = await axios.patch(`${HUBSPOT_PIPELINES}/deals/${req.params.id}`, req.body, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' } });
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { pipelinesStages: response.data });
+        return responseUtils.response(res);
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotUpdateDeals = async (req, res, auth) => {
+    try {
+        req.body?.closedate && (req.body.closedate = new Date(req.body.closedate).toISOString());
+        const response = await axios.patch(`${HUBSPOT_DEALS}/${req.params.id}`, { properties: req.body }, { headers: { 'Authorization': `Bearer ${auth.data.access_token}`, 'Content-Type': 'application/json' } });
+        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { deal: response.data });
         return responseUtils.response(res);
     } catch (error) {
         responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
@@ -276,132 +384,6 @@ const hubspotDeleteDeals = async (req, res, auth) => {
     }
 };
 
-const hubspotCreateContacts = async (req, res) => {
-    try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.post(HUBSPOT_CONTACTS, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
-
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contact: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotUpdateContacts = async (req, res) => {
-    try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.patch(`${HUBSPOT_CONTACTS}/${req.params.id}`, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
-
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { contact: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotCreateCompanies = async (req, res) => {
-    try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.post(HUBSPOT_COMPANIES, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
-
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { company: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotUpdateCompanies = async (req, res) => {
-    try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.patch(`${HUBSPOT_COMPANIES}/${req.params.id}`, { properties: req.body}, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' }});
-
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { company: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotCreatePipelines = async (req, res) => {
-    try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.post(`${HUBSPOT_PIPELINES}/deals`, req.body, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
-        
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { pipelinesStages: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotUpdatePipelines = async (req, res) => {
-    try {
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.patch(`${HUBSPOT_PIPELINES}/deals/${req.params.pipelineId}`, req.body, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
-        
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { pipelinesStages: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotCreateDeals = async (req, res) => {
-    try {
-        req.body.closedate = new Date(req.body.closedate).toISOString();
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.post(`${HUBSPOT_DEALS}`, { properties: req.body }, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
-
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { deal: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotUpdateDeals = async (req, res) => {
-    try {
-        req.body?.closedate && (req.body.closedate = new Date(req.body.closedate).toISOString());
-        let response = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
-        response = await axios.patch(`${HUBSPOT_DEALS}/${req.params.dealId}`, { properties: req.body }, { headers: { 'Authorization': `Bearer ${response.data.access_token}`, 'Content-Type': 'application/json' } });
-
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', { deal: response.data });
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
-const hubspotWebhook = async (req, res) => {
-    try {
-        const isValidSignature  = await hubspotRepository.verifyHubspotSignature(req, process.env.HUBSPOT_CLIENT_SECRET);
-        if (!isValidSignature ) {            
-            responseUtils.handleError(httpStatus.FORBIDDEN, 'Forbidden: Invalid signature');
-            return responseUtils.response(res);
-        }
-
-        // Functionalities to send notification with triggered events
-        console.log(isValidSignature, 'Implement Logic To Send Notification With Triggered Events');
-        console.log(req.body);
-
-        responseUtils.handleSuccess(httpStatus.OK, 'Success.', {});
-        return responseUtils.response(res);
-    } catch (error) {
-        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
-        return responseUtils.response(res);
-    }
-};
-
 const hubspotGetHandler = async (req, res) => {
     try {
         const { object, attribute } = req.params;
@@ -438,6 +420,147 @@ const hubspotGetHandler = async (req, res) => {
                 responseUtils.handleError(httpStatus.NOT_FOUND, 'Object specified not found');
                 return responseUtils.response(res);
         }
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotPostHandler = async (req, res) => {
+    try {
+        let result;
+        const { object } = req.params;
+        const auth = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+
+        if (!req.params || !object) {
+            responseUtils.handleError(httpStatus.BAD_REQUEST, 'Please specify param object to access');
+            return responseUtils.response(res);
+        }
+
+        switch (object) {
+            case 'custom-objects':
+                result = hubspotCreateCustomObjectsSchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+
+                return await hubspotCreateCustomObjects(req, res, auth);
+            case 'contacts':
+                result = hubspotCreateContactSchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+
+                return await hubspotCreateContacts(req, res, auth);
+            case 'companies':
+                result = hubspotCreateCompanySchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+                
+                return await hubspotCreateCompanies(req, res, auth);
+            case 'pipelines':
+                result = hubspotCreatePipelineSchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+
+                return await hubspotCreatePipelines(req, res, auth);
+            case 'deals':
+                result = hubspotCreateDealsSchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+                
+                return await hubspotCreateDeals(req, res, auth);
+            default:
+                responseUtils.handleError(httpStatus.NOT_FOUND, 'Object specified not found');
+                return responseUtils.response(res);
+        }
+
+    } catch (error) {
+        responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
+        return responseUtils.response(res);
+    }
+};
+
+const hubspotUpdateHandler = async (req, res) => {
+    try {
+        let result;
+        const { object, id } = req.params;
+        const auth = await hubspotRepository.handleHubspotAuth({ grant_type: 'refresh_token', refresh_token: req.authPlatform.refresh_token }, req.user.id);
+
+        if (!req.params || !object) {
+            responseUtils.handleError(httpStatus.BAD_REQUEST, 'Please specify param object to access');
+            return responseUtils.response(res);
+        }
+
+        if (!id) {
+            responseUtils.handleError(httpStatus.BAD_REQUEST, 'Please specify param object ID to update');
+            return responseUtils.response(res);
+        }
+
+        switch (object) {
+            case 'custom-objects':
+                result = hubspotUpdateCustomObjectsSchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+
+                return await hubspotUpdateCustomObjects(req, res, auth);
+            case 'contacts':
+                result = hubspotUpdateContactSchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+
+                return await hubspotUpdateContacts(req, res, auth);
+            case 'companies':
+                result = hubspotUpdateCompanySchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+                
+                return await hubspotUpdateCompanies(req, res, auth);
+            case 'pipelines':
+                result = hubspotUpdatePipelineSchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+
+                return await hubspotUpdatePipelines(req, res, auth);
+            case 'deals':
+                result = hubspotUpdateDealsSchema.validate(req.body, { abortEarly: false });
+                if (result?.error) {
+                    const errorMessage = `${result?.error.details[0].message} in the body.`;
+                    responseUtils.handleError(httpStatus.BAD_REQUEST, errorMessage);
+                    return responseUtils.response(res);
+                }
+                
+                return await hubspotUpdateDeals(req, res, auth);
+            default:
+                responseUtils.handleError(httpStatus.NOT_FOUND, 'Object specified not found');
+                return responseUtils.response(res);
+        }
+
     } catch (error) {
         responseUtils.handleError(error.response.status || httpStatus.INTERNAL_SERVER_ERROR, error.response.data.message || error.response.statusText || error.toString());
         return responseUtils.response(res);
@@ -486,6 +609,8 @@ export default {
     hubspotAuthRefreshAccessToken,
 
     hubspotGetHandler,
+    hubspotPostHandler,
+    hubspotUpdateHandler,
     hubspotDeleteHandler,
     
     hubspotCreateCustomObjects,

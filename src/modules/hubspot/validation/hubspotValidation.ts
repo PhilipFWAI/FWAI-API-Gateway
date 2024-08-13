@@ -203,7 +203,7 @@ const hubspotCreatePipelineSchema =  Joi.object({
   ),
 });
 
-const hubspotUpdateDealsPipelineSchema =  Joi.object({
+const hubspotUpdatePipelineSchema =  Joi.object({
   label: Joi.string().messages({
     'any.required': 'label is required. And is pipeline name',
     'string.base': 'label must be a string. And is pipeline name',
@@ -623,7 +623,7 @@ export {
   hubspotCreateContactSchema,
   hubspotUpdateContactSchema,
   hubspotCreatePipelineSchema,
-  hubspotUpdateDealsPipelineSchema,
+  hubspotUpdatePipelineSchema,
   hubspotCreateDealsSchema,
   hubspotUpdateDealsSchema,
   hubspotSearchContactsSchema,
