@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 const signupSchema = Joi.object({
   email: Joi.string().email().required().messages({
-      'string.base': 'email should be a type of text',
+      'string.base': 'email should be a type of string',
       'string.email': 'email must be a valid email',
       'string.empty': 'email cannot be an empty field',
       'any.required': 'email is required'
@@ -62,4 +62,22 @@ const accessTokenSchema = Joi.object({
   }),
 });
 
-export { signupSchema, signinSchema, userDeviceSchema, authorizationSchema, accessTokenSchema };
+const authTokensSchema =  Joi.object({
+  platform: Joi.string().valid('hubspot', 'google', 'zapier', 'stripe').required().messages({
+    'any.required': 'platform is required',
+    'string.base': 'platform must be a string',
+    'string.empty': 'platform is is not allowed to be empty',
+  }),
+    access_token: Joi.string().required().messages({
+      'any.required': 'access_token is required',
+      'string.base': 'access_token must be a string',
+      'string.empty': 'access_token is is not allowed to be empty',
+    }),
+    refresh_token: Joi.string().required().messages({
+      'any.required': 'refresh_token is required',
+      'string.base': 'refresh_token must be a string',
+      'string.empty': 'refresh_token is is not allowed to be empty',
+    }),
+});
+
+export { signupSchema, signinSchema, userDeviceSchema, authorizationSchema, accessTokenSchema, authTokensSchema };

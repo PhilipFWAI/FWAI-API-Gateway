@@ -4,8 +4,7 @@ import responseUtils from '../utils/responseUtils';
 import { comparePassword } from '../utils/passwordUtils';
 import authRepository from '../modules/auth/repository/authRepository';
 import accountRepository from '../modules/account/repository/accountRepository';
-import { ACCESS_TOKEN, ACCOUNT_TYPE, DEVICE_ID, EMAIL, ID, USER_ID } from '../utils/variablesUtils';
-
+import { ACCESS_TOKEN, ACCOUNT_TYPE, DEVICE_ID, EMAIL, ID, PLATFORM, USER_ID } from '../utils/variablesUtils';
 
 const isUserExist = async (req, res, next) => {
     try {
@@ -108,5 +107,46 @@ const isAccountTypeExist = async (req, res, next) => {
         return responseUtils.response(res);
     }
 };
-  
-export { isUserExist, isAccountVerified, isCredentialExist, isAccountTypeExist };
+
+const isAuthPlatformExist = async (req, res, next) => {
+    try {
+        const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ [USER_ID]: req.user.id, [PLATFORM]: req.body.platform });
+        if(authPlatformExist) {
+            const data = await authRepository.updateAuthPlatform({ user_id: req.user.id, platform: req.body.platform, access_token: req.body.access_token, refresh_token: req.body.refresh_token });
+            responseUtils.handleSuccess(httpStatus.OK, 'Success.', { token: data });
+            return responseUtils.response(res);
+        }
+
+        return next();
+    } catch (error) {    
+        responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
+        return responseUtils.response(res);
+    }
+};
+
+const isAuthPlatformTokenExist = (platform: string) => {
+    return async (req, res, next) => {
+        try {
+            const authPlatformExist = await authRepository.findAuthPlatformByAttributes({ [USER_ID]: req.user.id, [PLATFORM]: platform });
+            if (!authPlatformExist) {
+                responseUtils.handleError(httpStatus.NOT_FOUND, 'Account auth tokens didn`t saved and not found');
+                return responseUtils.response(res);
+            }
+
+            req.authPlatform = { access_token: authPlatformExist.access_token, refresh_token: authPlatformExist.refresh_token };
+            return next();
+        } catch (error) {    
+            responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error);
+            return responseUtils.response(res);
+        }
+    };
+};
+
+export {
+    isUserExist,
+    isAccountVerified,
+    isCredentialExist,
+    isAccountTypeExist,
+    isAuthPlatformExist,
+    isAuthPlatformTokenExist
+};

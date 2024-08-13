@@ -6,10 +6,10 @@ import { generateRandomString } from '../../../utils/jwtUtils';
 
 const googleAuth = async (req, res) => {
     try {
-      const scopes = JSON.parse(process.env.GOOGLE_SCOPES);
-      const googleAuth = googleOauth2Client.generateAuthUrl({ access_type: 'offline', scope: scopes });
-  
-      return res.redirect(googleAuth);
+        const scopes = JSON.parse(process.env.GOOGLE_SCOPES);
+        const googleAuth = googleOauth2Client.generateAuthUrl({ access_type: 'offline', scope: scopes });
+    
+        return res.redirect(googleAuth);
     } catch (error) {
         responseUtils.handleError(error.status || httpStatus.INTERNAL_SERVER_ERROR, error.toString());
         return responseUtils.response(res);
