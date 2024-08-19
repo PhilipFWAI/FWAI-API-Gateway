@@ -4,5 +4,6 @@ node_modules/
 
 script.json
 .vscode
+id_rsa
 .env
 dist
