@@ -1,13 +1,29 @@
-FROM node:20-alpine
+FROM node:20
 
-WORKDIR /fwai-api-gateway
+# Create an ssh connection for github with deploy keys
+RUN apt-get update && apt-get install -y openssh-client git
 
-COPY ../package.json ./
+# Create an ssh connection for github with deploy keys
+RUN apt-get update && apt-get install -y git openssh-client
+COPY ../../id_rsa /root/.ssh/id_rsa
 
-RUN npm install
+# Set appropriate permissions and configure SSH
+RUN chmod 600 /root/.ssh/id_rsa && \
+    ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-COPY .. .
+# Sets workdir and copies files from github
+WORKDIR /usr/src/app
+RUN git clone --depth 1 git@github.com:First-Wave-AI/api-gateway.git .
+COPY ../../.env .env
 
+# Clean up SSH key
+RUN rm -f /root/.ssh/id_rsa
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Expose needed ports
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Run application
+CMD ["npm", "start"]

@@ -10,10 +10,10 @@ import { routeBodyValidation, routeHeaderValidation, routeQueryValidation } from
 const router: Router = Router();
 
 router.get('/authorize', hubspotController.hubspotAuth);
-router.get('/auth-redirect-url',  routeQueryValidation(codeSchema), hubspotController.hubspotAuthCallback);
+router.get('/auth-redirect-url', routeQueryValidation(codeSchema), hubspotController.hubspotAuthCallback);
 router.get('/auth-refresh-access-token', routeHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotAuthRefreshAccessToken);
 
-router.post('/webhook',  hubspotController.hubspotWebhook);
+router.post('/webhook', hubspotController.hubspotWebhook);
 router.post('/:object', routeHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotPostHandler);
 router.patch('/:object/:id', routeHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotUpdateHandler);
 router.delete('/:object/:id', routeHeaderValidation(authorizationSchema), gatewayAuthentication, isAuthPlatformTokenExist('hubspot'), hubspotController.hubspotDeleteHandler);
